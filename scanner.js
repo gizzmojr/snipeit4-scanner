@@ -8,31 +8,105 @@ var mainDomElement = "#scanner";
 // "Private" global variables. Do not touch.
 
 function initScanner() {
-    // loadParams();
-    initBoard();
+    initPage();
 }
 
-function initBoard(callback) {
-    var board = document.createElement("div");
-    board.id = "board";
-    document.querySelector(mainDomElement).appendChild(board);
+function initPage(callback) {
+
+    var inputs = document.createElement("div");
+    inputs.className = "options";
+    document.querySelector(mainDomElement).appendChild(inputs);
+
+    var locationLabel = document.createElement("label");
+    locationLabel.innerText = "Locations";
+
+    var locationList = document.createElement("select");
+    locationList.id = "textLocation";
+    locationList.name = "location";
+    locationList.disabled = "true";
+
+    locationLabel.appendChild(locationList);
+
+    var userLabel = document.createElement("label");
+    userLabel.innerText = "Users";
+
+    var userList = document.createElement("select");
+    userList.id = "textUser";
+    userList.name = "user";
+    userList.disabled = "true";
+
+    userLabel.appendChild(userList);
 
     var submit = document.createElement("button");
-    submit.id = "btnTestSubmit";
+    submit.id = "btnSubmit";
     submit.innerText = "Submit";
     submit.type = "button";
     submit.addEventListener("click", function() {
-        doTest();
+        getAssetID("A-0001", function(callback) {
+        checkInAsset(callback);
+        checkOutAsset(callback);
+        });
     });
 
-    board.appendChild(submit);
+    inputs.appendChild(locationLabel);
+    inputs.appendChild(userLabel);
+    inputs.appendChild(submit);
+
+    loadLocations();
+    loadUsers();
 }
 
-function doTest() {
-    httpGet("/api/v1/users", function(response) {
-        console.log(response);
+function getAssetID(textSearch, callback) {
+    httpGet("/api/v1/hardware?search=" + textSearch, function(response) {
+        var assetID = response.rows[0].id;
+        callback(assetID);
     }, function(error) {
         alert(error.message);
+    });
+}
+
+function checkInAsset(assetID) {
+    var dataObj = {
+    };
+    httpPost("/api/v1/hardware/" + assetID + "/checkin", dataObj, function(response) {
+        console.log(response.messages);
+    });
+}
+
+function checkOutAsset(assetID) {
+    var dataObj = {
+        "user_id": document.getElementById("textUser").value
+    };
+    httpPost("/api/v1/hardware/" + assetID + "/checkout", dataObj, function(response) {
+        console.log(response.messages);
+    });
+}
+
+function loadLocations(callback) {
+    httpGet("/api/v1/locations", function(response) {
+        //document.getElementById("textLocation").disabled = false;
+        var locations = response.rows;
+
+        locations.forEach(function(location) {
+            var option = document.createElement("option");
+            option.value = location.name;
+            option.text = location.name;
+            document.getElementById("textLocation").appendChild(option);
+        });
+    });
+}
+
+function loadUsers(callback) {
+    httpGet("/api/v1/users", function(response) {
+        document.getElementById("textUser").disabled = false;
+        var users = response.rows;
+
+        users.forEach(function(user) {
+            var option = document.createElement("option");
+            option.value = user.id;
+            option.text = user.id + "-" + user.name;
+            document.getElementById("textUser").appendChild(option);
+        });
     });
 }
 
@@ -40,7 +114,19 @@ function httpGet(url, successCallback, errorCallback) {
     httpRequest("GET", url, "", successCallback, errorCallback);
 }
 
+function httpPost(url, dataObj, successCallback, errorCallback) {
+    httpRequest("Post", url, dataObj, successCallback, errorCallback);
+}
+
+function httpPatch(url, dataObj, successCallback, errorCallback) {
+    httpRequest("Patch", url, dataObj, successCallback, errorCallback);
+}
+
 function httpRequest(method, url, dataObj, successCallback, errorCallback) {
+    var payload = false;
+    if (dataObj !== "") {
+        payload = dataObj;
+    }
     var xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
     xhr.onreadystatechange = function() {
@@ -73,5 +159,5 @@ function httpRequest(method, url, dataObj, successCallback, errorCallback) {
     xhr.setRequestHeader("Accept", "application/json");
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.setRequestHeader("Authorization", 'Bearer ' + apiToken);
-    xhr.send(JSON.stringify(false));
+    xhr.send(JSON.stringify(payload));
 }

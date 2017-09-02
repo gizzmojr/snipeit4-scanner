@@ -7,14 +7,9 @@ body {
 #scanner {
     display: flex;
     height: 100%;
-    flex-direction: column;
+    flex-direction: row;
     flex: 1;
     overflow-x: auto;
-    max-width: 150px;
-}
-
-.options {
-    width: 100%;
 }
 
 select {

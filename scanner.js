@@ -12,10 +12,13 @@ function initScanner() {
 }
 
 function initPage(callback) {
-
     var inputs = document.createElement("div");
     inputs.className = "options";
     document.querySelector(mainDomElement).appendChild(inputs);
+
+    var inputDiv = document.createElement("div");
+    inputDiv.className = "input";
+    document.querySelector(mainDomElement).appendChild(inputDiv);
 
     var locationLabel = document.createElement("label");
     locationLabel.innerText = "Locations";
@@ -37,12 +40,22 @@ function initPage(callback) {
 
     userLabel.appendChild(userList);
 
+    var barcodeLabel = document.createElement("label");
+    barcodeLabel.innerText = "Scanned barcodes here";
+
+    var barcodeArea = document.createElement("textarea");
+    barcodeArea.name = "codearea";
+    barcodeArea.cols = "10";
+
+    inputDiv.appendChild(barcodeLabel);
+    inputDiv.appendChild(barcodeArea);
+
     var submit = document.createElement("button");
     submit.id = "btnSubmit";
     submit.innerText = "Submit";
     submit.type = "button";
     submit.addEventListener("click", function() {
-        getAssetID("A-0001", function(callback) {
+        getAssetID(barcodeArea.value, function(callback) {
         checkInAsset(callback);
         checkOutAsset(callback);
         });
@@ -56,13 +69,21 @@ function initPage(callback) {
     loadUsers();
 }
 
-function getAssetID(textSearch, callback) {
-    httpGet("/api/v1/hardware?search=" + textSearch, function(response) {
-        var assetID = response.rows[0].id;
-        callback(assetID);
-    }, function(error) {
-        alert(error.message);
-    });
+function getAssetID(inputList, callback) {
+    var inputArray = inputList.split('\n');
+    var inputID = "";
+    if (inputList == "") {
+        alert("Need inputs");
+        return
+    }
+    for (inputID in inputArray) {
+        httpGet("/api/v1/hardware?search=" + inputArray[inputID], function(response) {
+            var assetID = response.rows[0].id;
+            callback(assetID);
+        }, function(error) {
+            alert(error.message);
+        });
+    }
 }
 
 function checkInAsset(assetID) {

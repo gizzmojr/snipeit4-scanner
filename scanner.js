@@ -150,8 +150,9 @@ function createUsers() {
     usersDiv.appendChild(userList);
 
     document.querySelector(mainDomElement).appendChild(usersDiv);
-
     getUsers();
+    //TODO Sort the list reverse alphabetical
+
 }
 
 function getUsers(callback) {
@@ -162,7 +163,7 @@ function getUsers(callback) {
         users.forEach(function(user) {
             var option = document.createElement("option");
             option.value = user.id;
-            option.text = user.id + "-" + user.name;
+            option.text = user.name;
             document.getElementById("textUser").appendChild(option);
         });
     });

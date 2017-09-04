@@ -106,7 +106,7 @@ function getAssetID(inputList, callback) {
     for (inputID in inputArray) {
         httpGet("/api/v1/hardware?limit=25&search=" + inputArray[inputID], function(response) {
             if (response.total == 0) {
-                alert("Asset not found");
+                alert("Asset " + inputArray[inputID] + " not found");
                 return;
             }
             var assetID = response.rows[0].id;

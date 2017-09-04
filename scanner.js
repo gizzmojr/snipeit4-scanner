@@ -7,66 +7,93 @@ var mainDomElement = "#scanner";
 
 // "Private" global variables. Do not touch.
 
-function initScanner() {
-    initPage();
-}
-
-function initPage(callback) {
-    var inputs = document.createElement("div");
-    inputs.className = "options";
-    document.querySelector(mainDomElement).appendChild(inputs);
-
-    var inputDiv = document.createElement("div");
-    inputDiv.className = "input";
-    document.querySelector(mainDomElement).appendChild(inputDiv);
-
-    var locationLabel = document.createElement("label");
-    locationLabel.innerText = "Locations";
-
-    var locationList = document.createElement("select");
-    locationList.id = "textLocation";
-    locationList.name = "location";
-    locationList.disabled = "true";
-
-    locationLabel.appendChild(locationList);
-
-    var userLabel = document.createElement("label");
-    userLabel.innerText = "Users";
-
-    var userList = document.createElement("select");
-    userList.id = "textUser";
-    userList.name = "user";
-    userList.disabled = "true";
-
-    userLabel.appendChild(userList);
-
-    var barcodeLabel = document.createElement("label");
-    barcodeLabel.innerText = "Scanned barcodes here";
-
-    var barcodeArea = document.createElement("textarea");
-    barcodeArea.name = "codearea";
-    barcodeArea.cols = "10";
-
-    inputDiv.appendChild(barcodeLabel);
-    inputDiv.appendChild(barcodeArea);
+function initScanner(callback) {
+    createTabs();
+    document.getElementById("Updating").appendChild(createInput());
+    createUsers();
 
     var submit = document.createElement("button");
     submit.id = "btnSubmit";
     submit.innerText = "Submit";
     submit.type = "button";
     submit.addEventListener("click", function() {
-        getAssetID(barcodeArea.value, function(callback) {
+        getAssetID(document.getElementById("inputarea").value, function(callback) {
         checkInAsset(callback);
         checkOutAsset(callback);
         });
     });
 
-    inputs.appendChild(locationLabel);
-    inputs.appendChild(userLabel);
-    inputs.appendChild(submit);
+    document.querySelector(mainDomElement).appendChild(submit);
 
-    loadLocations();
-    loadUsers();
+    // Get the element with id="defaultOpen" and click on it
+    document.getElementById("defaultOpen").click();
+}
+
+function createInput() {
+    var inputDiv = document.createElement("div");
+    inputDiv.className = "input";
+
+    var inputLabel = document.createElement("label");
+    inputLabel.innerText = "Scanned barcodes here";
+
+    var inputArea = document.createElement("textarea");
+    inputArea.id = "inputarea";
+    inputArea.cols = "10";
+
+    inputDiv.appendChild(inputLabel);
+    inputDiv.appendChild(inputArea);
+
+    return inputDiv;
+}
+
+function createTabs() {
+    var tab = "";
+    var tabs = ['Check-in', 'Check-out', 'Updating'];
+
+    var tabsDiv = document.createElement("div");
+    tabsDiv.className = "tab";
+
+    document.querySelector(mainDomElement).appendChild(tabsDiv);
+
+    for (tab in tabs) {
+        var btnDiv = document.createElement("div");
+        btnDiv.id = tabs[tab];
+        btnDiv.className = "tabcontent";
+
+        var btn = document.createElement("button");
+        btn.className = "tablinks";
+        btn.innerHTML = tabs[tab];
+        btn.addEventListener("click", function() {
+            openTab(event, this.innerHTML);
+        });
+        if (tabs[tab] == "Updating") {
+            btn.id = "defaultOpen";
+        }
+
+        tabsDiv.appendChild(btn);
+        document.querySelector(mainDomElement).appendChild(btnDiv);
+    }
+}
+
+function openTab(evt, tabName) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
 }
 
 function getAssetID(inputList, callback) {
@@ -74,10 +101,14 @@ function getAssetID(inputList, callback) {
     var inputID = "";
     if (inputList == "") {
         alert("Need inputs");
-        return
+        return;
     }
     for (inputID in inputArray) {
-        httpGet("/api/v1/hardware?search=" + inputArray[inputID], function(response) {
+        httpGet("/api/v1/hardware?limit=25&search=" + inputArray[inputID], function(response) {
+            if (response.total == 0) {
+                alert("Asset not found");
+                return;
+            }
             var assetID = response.rows[0].id;
             callback(assetID);
         }, function(error) {
@@ -103,21 +134,27 @@ function checkOutAsset(assetID) {
     });
 }
 
-function loadLocations(callback) {
-    httpGet("/api/v1/locations", function(response) {
-        //document.getElementById("textLocation").disabled = false;
-        var locations = response.rows;
+function createUsers() {
+    var usersDiv = document.createElement("div");
+    usersDiv.className = "users";
 
-        locations.forEach(function(location) {
-            var option = document.createElement("option");
-            option.value = location.name;
-            option.text = location.name;
-            document.getElementById("textLocation").appendChild(option);
-        });
-    });
+    var userLabel = document.createElement("label");
+    userLabel.innerText = "Users";
+
+    var userList = document.createElement("select");
+    userList.id = "textUser";
+    userList.name = "user";
+    userList.disabled = "true";
+
+    usersDiv.appendChild(userLabel);
+    usersDiv.appendChild(userList);
+
+    document.querySelector(mainDomElement).appendChild(usersDiv);
+
+    getUsers();
 }
 
-function loadUsers(callback) {
+function getUsers(callback) {
     httpGet("/api/v1/users", function(response) {
         document.getElementById("textUser").disabled = false;
         var users = response.rows;

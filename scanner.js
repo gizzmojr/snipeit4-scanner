@@ -9,32 +9,74 @@ var mainDomElement = "#scanner";
 
 function initScanner(callback) {
     createTabs();
-    document.getElementById("Updating").appendChild(createInput());
-    createUsers();
+    initUpdating();
+    initCheckIn();
+    initCheckOut();
+
+    // Get the element with id="defaultOpen" and click on it
+    document.getElementById("defaultOpen").click();
+}
+
+function initCheckOut() {
+    var elem = document.getElementById("Check-out");
+    elem.appendChild(createInput());
+    elem.appendChild(createUsers());
 
     var submit = document.createElement("button");
     submit.id = "btnSubmit";
     submit.innerText = "Submit";
     submit.type = "button";
     submit.addEventListener("click", function() {
-        getAssetID(document.getElementById("inputarea").value, function(callback) {
-        checkInAsset(callback);
-        checkOutAsset(callback);
+        getAssetID(elem.querySelectorAll("textarea#inputarea")[0].value, function(callback) {
+            checkOutAsset(callback, "Check-out");
         });
     });
 
-    document.querySelector(mainDomElement).appendChild(submit);
+    elem.appendChild(submit);
+}
 
-    // Get the element with id="defaultOpen" and click on it
-    document.getElementById("defaultOpen").click();
+function initCheckIn() {
+    var elem = document.getElementById("Check-in");
+    elem.appendChild(createInput());
+
+    var submit = document.createElement("button");
+    submit.id = "btnSubmit";
+    submit.innerText = "Submit";
+    submit.type = "button";
+    submit.addEventListener("click", function() {
+        getAssetID(elem.querySelectorAll("textarea#inputarea")[0].value, function(callback) {
+            checkInAsset(callback);
+        });
+    });
+
+    elem.appendChild(submit);
+}
+
+function initUpdating() {
+    var elem = document.getElementById("Updating");
+    elem.appendChild(createInput());
+    elem.appendChild(createUsers());
+
+    var submit = document.createElement("button");
+    submit.id = "btnSubmit";
+    submit.innerText = "Submit";
+    submit.type = "button";
+    submit.addEventListener("click", function() {
+        getAssetID(elem.querySelectorAll("textarea#inputarea")[0].value, function(callback) {
+            checkInAsset(callback);
+            checkOutAsset(callback, "Updating");
+        });
+    });
+
+    elem.appendChild(submit);
 }
 
 function createInput() {
     var inputDiv = document.createElement("div");
     inputDiv.className = "input";
 
-    var inputLabel = document.createElement("label");
-    inputLabel.innerText = "Scanned barcodes here";
+    var inputLabel = document.createElement("p");
+    inputLabel.innerText = "Barcodes here\nOne per line";
 
     var inputArea = document.createElement("textarea");
     inputArea.id = "inputarea";
@@ -106,7 +148,7 @@ function getAssetID(inputList, callback) {
     for (inputID in inputArray) {
         httpGet("/api/v1/hardware?limit=25&search=" + inputArray[inputID], function(response) {
             if (response.total == 0) {
-                alert("Asset " + inputArray[inputID] + " not found");
+                alert("Asset not found");
                 return;
             }
             var assetID = response.rows[0].id;
@@ -125,9 +167,9 @@ function checkInAsset(assetID) {
     });
 }
 
-function checkOutAsset(assetID) {
+function checkOutAsset(assetID, tab) {
     var dataObj = {
-        "user_id": document.getElementById("textUser").value
+        "user_id": document.getElementById(tab).querySelectorAll("#textUser")[0].value
     };
     httpPost("/api/v1/hardware/" + assetID + "/checkout", dataObj, function(response) {
         console.log(response.messages);
@@ -138,8 +180,8 @@ function createUsers() {
     var usersDiv = document.createElement("div");
     usersDiv.className = "users";
 
-    var userLabel = document.createElement("label");
-    userLabel.innerText = "Users";
+    var userLabel = document.createElement("p");
+    userLabel.innerText = "Check-out to the following";
 
     var userList = document.createElement("select");
     userList.id = "textUser";
@@ -149,22 +191,26 @@ function createUsers() {
     usersDiv.appendChild(userLabel);
     usersDiv.appendChild(userList);
 
-    document.querySelector(mainDomElement).appendChild(usersDiv);
     getUsers();
-    //TODO Sort the list reverse alphabetical
+
+    return usersDiv;
 
 }
 
-function getUsers(callback) {
+function getUsers() {
     httpGet("/api/v1/users", function(response) {
-        document.getElementById("textUser").disabled = false;
         var users = response.rows;
+        var elemList = document.querySelectorAll('#textUser');
 
-        users.forEach(function(user) {
-            var option = document.createElement("option");
-            option.value = user.id;
-            option.text = user.name;
-            document.getElementById("textUser").appendChild(option);
+        elemList.forEach(function(elem) {
+            elem.disabled = false;
+            users.forEach(function(user) {
+                var option = document.createElement("option");
+                option.value = user.id;
+                option.text = user.name;
+                elem.appendChild(option);
+            });
+            //TODO Sort the list reverse alphabetical
         });
     });
 }

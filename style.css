@@ -7,6 +7,14 @@ body {
 #scanner {
 }
 
+p {
+    margin: 5px;
+}
+
+div.users select {
+    height: 25px;
+}
+
 /* ======== Tabs ======== */
 /* Style the tab */
 div.tab {

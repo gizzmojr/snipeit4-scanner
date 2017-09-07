@@ -146,15 +146,21 @@ function getAssetID(inputList, callback) {
         return;
     }
     for (inputID in inputArray) {
+        if (inputArray[inputID] == "") {
+            continue;
+        }
         httpGet("/api/v1/hardware?limit=25&search=" + inputArray[inputID], function(response) {
             if (response.total == 0) {
-                alert("Asset not found");
-                return;
+                console.log("Asset not found");
+                continue;
+            } else if (response.total > 1) {
+                console.log("Too many results, skipping");
+                continue;
             }
             var assetID = response.rows[0].id;
             callback(assetID);
         }, function(error) {
-            alert(error.message);
+            console.log(error.message);
         });
     }
 }

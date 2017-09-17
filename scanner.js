@@ -7,75 +7,23 @@ var mainDomElement = "#scanner";
 
 // "Private" global variables. Do not touch.
 
-function initScanner(callback) {
-    createTabs();
-    initUpdating();
-    initCheckIn();
-    initCheckOut();
-
-    // Get the element with id="defaultOpen" and click on it
-    document.getElementById("defaultOpen").click();
+function checkInAsset(assetID, tab, callback) {
+    var dataObj = {
+    };
+    httpPost("/api/v1/hardware/" + assetID + "/checkin", dataObj, function(response) {
+        //console.log(response.messages);
+        callback(null, assetID, tab);
+    });
 }
 
-function initCheckOut() {
-    var elem = document.getElementById("Check-out");
-    elem.appendChild(createInput());
-    elem.appendChild(createUsers());
-
-    var submit = document.createElement("button");
-    submit.id = "btnSubmit";
-    submit.innerText = "Submit";
-    submit.type = "button";
-    submit.addEventListener("click", function() {
+function checkOutAsset(assetID, tab, callback) {
+    var dataObj = {
+        "user_id": document.getElementById(tab).querySelectorAll("#textUser")[0].value
+    };
+    httpPost("/api/v1/hardware/" + assetID + "/checkout", dataObj, function(response) {
+        //console.log(response.messages);
+        callback(null, "Done with asset - " + assetID);
     });
-
-    elem.appendChild(submit);
-}
-
-function initCheckIn() {
-    var elem = document.getElementById("Check-in");
-    elem.appendChild(createInput());
-
-    var submit = document.createElement("button");
-    submit.id = "btnSubmit";
-    submit.innerText = "Submit";
-    submit.type = "button";
-    submit.addEventListener("click", function() {
-    });
-
-    elem.appendChild(submit);
-}
-
-function initUpdating() {
-    var elem = document.getElementById("Updating");
-    elem.appendChild(createInput());
-    elem.appendChild(createUsers());
-
-    var submit = document.createElement("button");
-    submit.id = "btnSubmit";
-    submit.innerText = "Submit";
-    submit.type = "button";
-    submit.addEventListener("click", function() {
-        var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
-        for (var asset in assetArray) {
-            async.waterfall([
-                function(callback) {
-                    console.log("Trying asset = " + assetArray[asset])
-                    callback(null, assetArray[asset], "Updating");
-                },
-                getAssetID,
-                checkInAsset,
-                checkOutAsset
-            ], function(error, result) {
-                console.log(result);
-                if (error) {
-                    console.log("Something didn't go right");
-                }
-            });
-        }
-    });
-
-    elem.appendChild(submit);
 }
 
 function createInput() {
@@ -124,69 +72,6 @@ function createTabs() {
 
 }
 
-function openTab(evt, tabName) {
-    // Declare all variables
-    var i, tabcontent, tablinks;
-
-    // Get all elements with class="tabcontent" and hide them
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-
-    // Get all elements with class="tablinks" and remove the class "active"
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-
-    // Show the current tab, and add an "active" class to the button that opened the tab
-    document.getElementById(tabName).style.display = "block";
-    evt.currentTarget.className += " active";
-}
-
-function getAssetIDArray(inputList) {
-    var inputArray = inputList.split('\n');
-    if (inputList == "") {
-        alert("Need inputs");
-        return;
-    } else if (inputArray[inputArray.length - 1] == "") {
-        inputArray.splice(inputArray.length - 1, 1); // If last line was blank
-        return inputArray;
-    } else {
-        return inputArray;
-    }
-}
-
-function getAssetID(assetTag, tab, callback) {
-    httpGet("/api/v1/hardware?search=" + assetTag, function(response) {
-        if (response.total == 0 || response.total > 1) {
-            return;
-            //TODO might not be right
-        }
-        callback(null, response.rows[0].id, tab);
-    });
-}
-
-function checkInAsset(assetID, tab, callback) {
-    var dataObj = {
-    };
-    httpPost("/api/v1/hardware/" + assetID + "/checkin", dataObj, function(response) {
-        //console.log(response.messages);
-        callback(null, assetID, tab);
-    });
-}
-
-function checkOutAsset(assetID, tab, callback) {
-    var dataObj = {
-        "user_id": document.getElementById(tab).querySelectorAll("#textUser")[0].value
-    };
-    httpPost("/api/v1/hardware/" + assetID + "/checkout", dataObj, function(response) {
-        //console.log(response.messages);
-        callback(null, "Done with asset - " + assetID);
-    });
-}
-
 function createUsers() {
     var usersDiv = document.createElement("div");
     usersDiv.className = "users";
@@ -206,6 +91,29 @@ function createUsers() {
 
     return usersDiv;
 
+}
+
+function getAssetID(assetTag, tab, callback) {
+    httpGet("/api/v1/hardware?search=" + assetTag, function(response) {
+        if (response.total == 0 || response.total > 1) {
+            return;
+            //TODO might not be right
+        }
+        callback(null, response.rows[0].id, tab);
+    });
+}
+
+function getAssetIDArray(inputList) {
+    var inputArray = inputList.split('\n');
+    if (inputList == "") {
+        alert("Need inputs");
+        return;
+    } else if (inputArray[inputArray.length - 1] == "") {
+        inputArray.splice(inputArray.length - 1, 1); // If last line was blank
+        return inputArray;
+    } else {
+        return inputArray;
+    }
 }
 
 function getUsers() {
@@ -276,4 +184,95 @@ function httpRequest(method, url, dataObj, successCallback, errorCallback) {
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.setRequestHeader("Authorization", 'Bearer ' + apiToken);
     xhr.send(JSON.stringify(payload));
+}
+function initScanner(callback) {
+    createTabs();
+    initUpdating();
+    initCheckIn();
+    initCheckOut();
+
+    // Get the element with id="defaultOpen" and click on it
+    document.getElementById("defaultOpen").click();
+}
+
+function initCheckIn() {
+    var elem = document.getElementById("Check-in");
+    elem.appendChild(createInput());
+
+    var submit = document.createElement("button");
+    submit.id = "btnSubmit";
+    submit.innerText = "Submit";
+    submit.type = "button";
+    submit.addEventListener("click", function() {
+    });
+
+    elem.appendChild(submit);
+}
+
+function initCheckOut() {
+    var elem = document.getElementById("Check-out");
+    elem.appendChild(createInput());
+    elem.appendChild(createUsers());
+
+    var submit = document.createElement("button");
+    submit.id = "btnSubmit";
+    submit.innerText = "Submit";
+    submit.type = "button";
+    submit.addEventListener("click", function() {
+    });
+
+    elem.appendChild(submit);
+}
+
+function initUpdating() {
+    var elem = document.getElementById("Updating");
+    elem.appendChild(createInput());
+    elem.appendChild(createUsers());
+
+    var submit = document.createElement("button");
+    submit.id = "btnSubmit";
+    submit.innerText = "Submit";
+    submit.type = "button";
+    submit.addEventListener("click", function() {
+        var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
+        for (var asset in assetArray) {
+            async.waterfall([
+                function(callback) {
+                    console.log("Trying asset = " + assetArray[asset])
+                    callback(null, assetArray[asset], "Updating");
+                },
+                getAssetID,
+                checkInAsset,
+                checkOutAsset
+            ], function(error, result) {
+                console.log(result);
+                if (error) {
+                    console.log("Something didn't go right");
+                }
+            });
+        }
+    });
+
+    elem.appendChild(submit);
+}
+
+function openTab(evt, tabName) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
 }

@@ -108,9 +108,6 @@ function getAssetIDArray(inputList) {
     if (inputList == "") {
         alert("Need inputs");
         return;
-    } else if (inputArray[inputArray.length - 1] == "") {
-        inputArray.splice(inputArray.length - 1, 1); // If last line was blank
-        return inputArray;
     } else {
         return inputArray;
     }
@@ -236,10 +233,12 @@ function initUpdating() {
     submit.addEventListener("click", function() {
         var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
         for (var asset in assetArray) {
+            var assetTag = assetArray[asset];
+            if (assetTag == "") { continue };
             async.waterfall([
                 function(callback) {
-                    console.log("Trying asset = " + assetArray[asset])
-                    callback(null, assetArray[asset], "Updating");
+                    console.log("Trying asset = " + assetTag)
+                    callback(null, assetTag, "Updating");
                 },
                 getAssetID,
                 checkInAsset,

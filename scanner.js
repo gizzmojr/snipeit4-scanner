@@ -96,6 +96,7 @@ function createUsers() {
 function getAssetID(assetTag, tab, callback) {
     httpGet("/api/v1/hardware?search=" + assetTag, function(response) {
         if (response.total == 0 || response.total > 1) {
+            console.log("Invalid tag " + assetTag)
             return;
             //TODO might not be right
         }
@@ -237,7 +238,7 @@ function initUpdating() {
             if (assetTag == "") { continue };
             async.waterfall([
                 function(callback) {
-                    console.log("Trying asset = " + assetTag)
+                    console.log("Trying asset tag " + assetTag)
                     callback(null, assetTag, "Updating");
                 },
                 getAssetID,

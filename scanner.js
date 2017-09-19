@@ -27,9 +27,6 @@ function initCheckOut() {
     submit.innerText = "Submit";
     submit.type = "button";
     submit.addEventListener("click", function() {
-        getAssetID(elem.querySelectorAll("textarea#inputarea")[0].value, function(callback) {
-            checkOutAsset(callback, "Check-out");
-        });
     });
 
     elem.appendChild(submit);
@@ -44,9 +41,6 @@ function initCheckIn() {
     submit.innerText = "Submit";
     submit.type = "button";
     submit.addEventListener("click", function() {
-        getAssetID(elem.querySelectorAll("textarea#inputarea")[0].value, function(callback) {
-            checkInAsset(callback);
-        });
     });
 
     elem.appendChild(submit);
@@ -62,10 +56,23 @@ function initUpdating() {
     submit.innerText = "Submit";
     submit.type = "button";
     submit.addEventListener("click", function() {
-        getAssetID(elem.querySelectorAll("textarea#inputarea")[0].value, function(callback) {
-            checkInAsset(callback);
-            checkOutAsset(callback, "Updating");
-        });
+        var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
+        for (var asset in assetArray) {
+            async.waterfall([
+                function(callback) {
+                    console.log("Trying asset = " + assetArray[asset])
+                    callback(null, assetArray[asset], "Updating");
+                },
+                getAssetID,
+                checkInAsset,
+                checkOutAsset
+            ], function(error, result) {
+                console.log(result);
+                if (error) {
+                    console.log("Something didn't go right");
+                }
+            });
+        }
     });
 
     elem.appendChild(submit);
@@ -89,7 +96,6 @@ function createInput() {
 }
 
 function createTabs() {
-    var tab = "";
     var tabs = ['Check-in', 'Check-out', 'Updating'];
 
     var tabsDiv = document.createElement("div");
@@ -97,7 +103,7 @@ function createTabs() {
 
     document.querySelector(mainDomElement).appendChild(tabsDiv);
 
-    for (tab in tabs) {
+    for (var tab in tabs) {
         var btnDiv = document.createElement("div");
         btnDiv.id = tabs[tab];
         btnDiv.className = "tabcontent";
@@ -115,6 +121,7 @@ function createTabs() {
         tabsDiv.appendChild(btn);
         document.querySelector(mainDomElement).appendChild(btnDiv);
     }
+
 }
 
 function openTab(evt, tabName) {
@@ -138,47 +145,45 @@ function openTab(evt, tabName) {
     evt.currentTarget.className += " active";
 }
 
-function getAssetID(inputList, callback) {
+function getAssetIDArray(inputList) {
     var inputArray = inputList.split('\n');
-    var inputID = "";
     if (inputList == "") {
         alert("Need inputs");
         return;
-    }
-    for (inputID in inputArray) {
-        if (inputArray[inputID] == "") {
-            continue;
-        }
-        httpGet("/api/v1/hardware?limit=25&search=" + inputArray[inputID], function(response) {
-            if (response.total == 0) {
-                console.log("Asset not found");
-                continue;
-            } else if (response.total > 1) {
-                console.log("Too many results, skipping");
-                continue;
-            }
-            var assetID = response.rows[0].id;
-            callback(assetID);
-        }, function(error) {
-            console.log(error.message);
-        });
+    } else if (inputArray[inputArray.length - 1] == "") {
+        inputArray.splice(inputArray.length - 1, 1); // If last line was blank
+        return inputArray;
+    } else {
+        return inputArray;
     }
 }
 
-function checkInAsset(assetID) {
-    var dataObj = {
-    };
-    httpPost("/api/v1/hardware/" + assetID + "/checkin", dataObj, function(response) {
-        console.log(response.messages);
+function getAssetID(assetTag, tab, callback) {
+    httpGet("/api/v1/hardware?search=" + assetTag, function(response) {
+        if (response.total == 0 || response.total > 1) {
+            return;
+            //TODO might not be right
+        }
+        callback(null, response.rows[0].id, tab);
     });
 }
 
-function checkOutAsset(assetID, tab) {
+function checkInAsset(assetID, tab, callback) {
+    var dataObj = {
+    };
+    httpPost("/api/v1/hardware/" + assetID + "/checkin", dataObj, function(response) {
+        //console.log(response.messages);
+        callback(null, assetID, tab);
+    });
+}
+
+function checkOutAsset(assetID, tab, callback) {
     var dataObj = {
         "user_id": document.getElementById(tab).querySelectorAll("#textUser")[0].value
     };
     httpPost("/api/v1/hardware/" + assetID + "/checkout", dataObj, function(response) {
-        console.log(response.messages);
+        //console.log(response.messages);
+        callback(null, "Done with asset - " + assetID);
     });
 }
 

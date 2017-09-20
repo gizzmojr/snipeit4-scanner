@@ -87,8 +87,6 @@ function createUsers() {
     usersDiv.appendChild(userLabel);
     usersDiv.appendChild(userList);
 
-    getUsers();
-
     return usersDiv;
 
 }
@@ -188,6 +186,8 @@ function initScanner(callback) {
     initUpdating();
     initCheckIn();
     initCheckOut();
+
+    getUsers();
 
     // Get the element with id="defaultOpen" and click on it
     document.getElementById("defaultOpen").click();

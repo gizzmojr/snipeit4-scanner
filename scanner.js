@@ -22,7 +22,7 @@ function checkOutAsset(assetID, tab, callback) {
     };
     httpPost("/api/v1/hardware/" + assetID + "/checkout", dataObj, function(response) {
         //console.log(response.messages);
-        callback(null, "Done with asset - " + assetID);
+        callback(null, tab, "Done with asset - " + assetID);
     });
 }
 
@@ -36,6 +36,7 @@ function createInput() {
     var inputArea = document.createElement("textarea");
     inputArea.id = "inputarea";
     inputArea.cols = "10";
+    inputArea.rows = "10";
 
     inputDiv.appendChild(inputLabel);
     inputDiv.appendChild(inputArea);
@@ -94,11 +95,11 @@ function createUsers() {
 function getAssetID(assetTag, tab, callback) {
     httpGet("/api/v1/hardware?search=" + assetTag, function(response) {
         if (response.total == 0 || response.total > 1) {
-            console.log("Invalid tag " + assetTag)
-            return;
+            callback("Invalid tag " + assetTag);
             //TODO might not be right
+        } else {
+            callback(null, response.rows[0].id, tab);
         }
-        callback(null, response.rows[0].id, tab);
     });
 }
 
@@ -243,11 +244,15 @@ function initUpdating() {
                 },
                 getAssetID,
                 checkInAsset,
-                checkOutAsset
+                checkOutAsset,
+                function(callback) {
+                    elem.querySelectorAll("textarea#inputarea")[0].value = "";
+                }
             ], function(error, result) {
-                console.log(result);
                 if (error) {
-                    console.log("Something didn't go right");
+                    console.log(error);
+                } else {
+                    console.log(result);
                 }
             });
         }

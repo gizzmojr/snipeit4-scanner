@@ -21,8 +21,8 @@ function checkOutAsset(assetID, tab, callback) {
         "user_id": document.getElementById(tab).querySelectorAll("#textUser")[0].value
     };
     httpPost("/api/v1/hardware/" + assetID + "/checkout", dataObj, function(response) {
-        //console.log(response.messages);
-        callback(null, tab, "Done with asset - " + assetID);
+        console.log("Done with asset - " + assetID);
+        callback(null);
     });
 }
 

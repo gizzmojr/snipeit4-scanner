@@ -240,6 +240,28 @@ function initCheckOut() {
     submit.innerText = "Submit";
     submit.type = "button";
     submit.addEventListener("click", function() {
+        var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
+        for (var asset in assetArray) {
+            var assetTag = assetArray[asset];
+            if (assetTag == "") { continue };
+            async.waterfall([
+                function(callback) {
+                    console.log("Trying asset tag " + assetTag)
+                    callback(null, assetTag, "Check-out");
+                },
+                getAssetID,
+                checkOutAsset,
+                function(callback) {
+                    elem.querySelectorAll("textarea#inputarea")[0].value = "";
+                }
+            ], function(error, result) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log(result);
+                }
+            });
+        }
     });
 
     elem.appendChild(submit);

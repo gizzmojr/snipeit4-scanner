@@ -16,10 +16,7 @@ function checkInAsset(assetID, tab, callback) {
     });
 }
 
-function checkOutAsset(assetID, tab, callback) {
-    var dataObj = {
-        "user_id": document.getElementById(tab).querySelectorAll("#textUser")[0].value
-    };
+function checkOutAsset(assetID, tab, dataObj, callback) {
     httpPost("/api/v1/hardware/" + assetID + "/checkout", dataObj, function(response) {
         console.log("Done with asset - " + assetID);
         callback(null);
@@ -44,8 +41,27 @@ function createInput() {
     return inputDiv;
 }
 
+function createLocations() {
+    var usersDiv = document.createElement("div");
+    usersDiv.className = "locations";
+
+    var userLabel = document.createElement("p");
+    userLabel.innerText = "Check-out to the following";
+
+    var userList = document.createElement("select");
+    userList.id = "textLocation";
+    userList.name = "location";
+    userList.disabled = "true";
+
+    usersDiv.appendChild(userLabel);
+    usersDiv.appendChild(userList);
+
+    return usersDiv;
+
+}
+
 function createTabs() {
-    var tabs = ['Check-in', 'Check-out', 'Updating'];
+    var tabs = ['Check-in', 'Check-out', 'Updating (User)', 'Updating (Location)'];
 
     var tabsDiv = document.createElement("div");
     tabsDiv.className = "tab";
@@ -63,7 +79,7 @@ function createTabs() {
         btn.addEventListener("click", function() {
             openTab(event, this.innerHTML);
         });
-        if (tabs[tab] == "Updating") {
+        if (tabs[tab] == "Updating (User)") {
             btn.id = "defaultOpen";
         }
 
@@ -111,6 +127,24 @@ function getAssetIDArray(inputList) {
     } else {
         return inputArray;
     }
+}
+
+function getLocations() {
+    httpGet("/api/v1/locations", function(response) {
+        var users = response.rows;
+        var elemList = document.querySelectorAll('#textLocation');
+
+        elemList.forEach(function(elem) {
+            elem.disabled = false;
+            users.forEach(function(user) {
+                var option = document.createElement("option");
+                option.value = user.id;
+                option.text = user.name;
+                elem.appendChild(option);
+            });
+            //TODO Sort the list reverse alphabetical
+        });
+    });
 }
 
 function getUsers() {
@@ -184,10 +218,12 @@ function httpRequest(method, url, dataObj, successCallback, errorCallback) {
 }
 function initScanner(callback) {
     createTabs();
-    initUpdating();
+    initUpdatingLocation();
+    initUpdatingUser();
     initCheckIn();
     initCheckOut();
 
+    getLocations();
     getUsers();
 
     // Get the element with id="defaultOpen" and click on it
@@ -250,6 +286,12 @@ function initCheckOut() {
                     callback(null, assetTag, "Check-out");
                 },
                 getAssetID,
+                function(assetID, tab, callback) {
+                    var dataObj = {
+                        "user_id": document.getElementById(tab).querySelectorAll("#textUser")[0].value
+                    };
+                    callback(null, assetID, tab, dataObj);
+                },
                 checkOutAsset,
                 function(callback) {
                     elem.querySelectorAll("textarea#inputarea")[0].value = "";
@@ -267,8 +309,52 @@ function initCheckOut() {
     elem.appendChild(submit);
 }
 
-function initUpdating() {
-    var elem = document.getElementById("Updating");
+function initUpdatingLocation() {
+    var elem = document.getElementById("Updating (Location)");
+    elem.appendChild(createInput());
+    elem.appendChild(createLocations());
+
+    var submit = document.createElement("button");
+    submit.id = "btnSubmit";
+    submit.innerText = "Submit";
+    submit.type = "button";
+    submit.addEventListener("click", function() {
+        var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
+        for (var asset in assetArray) {
+            var assetTag = assetArray[asset];
+            if (assetTag == "") { continue };
+            async.waterfall([
+                function(callback) {
+                    console.log("Trying asset tag " + assetTag)
+                    callback(null, assetTag, "Updating (Location)");
+                },
+                getAssetID,
+                checkInAsset,
+                function(assetID, tab, callback) {
+                    var dataObj = {
+                        "name": document.getElementById(tab).querySelectorAll("#textLocation")[0].value
+                    };
+                    callback(null, assetID, tab, dataObj);
+                },
+                checkOutAsset,
+                function(callback) {
+                    elem.querySelectorAll("textarea#inputarea")[0].value = "";
+                }
+            ], function(error, result) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log(result);
+                }
+            });
+        }
+    });
+
+    elem.appendChild(submit);
+}
+
+function initUpdatingUser() {
+    var elem = document.getElementById("Updating (User)");
     elem.appendChild(createInput());
     elem.appendChild(createUsers());
 
@@ -284,10 +370,16 @@ function initUpdating() {
             async.waterfall([
                 function(callback) {
                     console.log("Trying asset tag " + assetTag)
-                    callback(null, assetTag, "Updating");
+                    callback(null, assetTag, "Updating (User)");
                 },
                 getAssetID,
                 checkInAsset,
+                function(assetID, tab, callback) {
+                    var dataObj = {
+                        "user_id": document.getElementById(tab).querySelectorAll("#textUser")[0].value
+                    };
+                    callback(null, assetID, tab, dataObj);
+                },
                 checkOutAsset,
                 function(callback) {
                     elem.querySelectorAll("textarea#inputarea")[0].value = "";

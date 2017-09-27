@@ -7,16 +7,16 @@ var mainDomElement = "#scanner";
 
 // "Private" global variables. Do not touch.
 
-function checkInAsset(assetID, tab, callback) {
+function checkInAsset(assetID, callback) {
     var dataObj = {
     };
     httpPost("/api/v1/hardware/" + assetID + "/checkin", dataObj, function(response) {
         //console.log(response.messages);
-        callback(null, assetID, tab);
+        callback(null, assetID);
     });
 }
 
-function checkOutAsset(assetID, tab, dataObj, callback) {
+function checkOutAsset(assetID, dataObj, callback) {
     httpPost("/api/v1/hardware/" + assetID + "/checkout", dataObj, function(response) {
         console.log("Done with asset - " + assetID);
         callback(null);
@@ -108,13 +108,13 @@ function createUsers() {
 
 }
 
-function getAssetID(assetTag, tab, callback) {
+function getAssetID(assetTag, callback) {
     httpGet("/api/v1/hardware?search=" + assetTag, function(response) {
         if (response.total == 0 || response.total > 1) {
             callback("Invalid tag " + assetTag);
             //TODO might not be right
         } else {
-            callback(null, response.rows[0].id, tab);
+            callback(null, response.rows[0].id);
         }
     });
 }
@@ -231,7 +231,8 @@ function initScanner(callback) {
 }
 
 function initCheckIn() {
-    var elem = document.getElementById("Check-in");
+    var tab = "Check-in";
+    var elem = document.getElementById(tab);
     elem.appendChild(createInput());
 
     var submit = document.createElement("button");
@@ -246,7 +247,7 @@ function initCheckIn() {
             async.waterfall([
                 function(callback) {
                     console.log("Trying asset tag " + assetTag)
-                    callback(null, assetTag, "Check-in");
+                    callback(null, assetTag);
                 },
                 getAssetID,
                 checkInAsset,
@@ -267,7 +268,8 @@ function initCheckIn() {
 }
 
 function initCheckOut() {
-    var elem = document.getElementById("Check-out");
+    var tab = "Check-out";
+    var elem = document.getElementById(tab);
     elem.appendChild(createInput());
     elem.appendChild(createUsers());
 
@@ -283,14 +285,14 @@ function initCheckOut() {
             async.waterfall([
                 function(callback) {
                     console.log("Trying asset tag " + assetTag)
-                    callback(null, assetTag, "Check-out");
+                    callback(null, assetTag);
                 },
                 getAssetID,
-                function(assetID, tab, callback) {
+                function(assetID, callback) {
                     var dataObj = {
                         "user_id": document.getElementById(tab).querySelectorAll("#textUser")[0].value
                     };
-                    callback(null, assetID, tab, dataObj);
+                    callback(null, assetID, dataObj);
                 },
                 checkOutAsset,
                 function(callback) {
@@ -310,7 +312,8 @@ function initCheckOut() {
 }
 
 function initUpdatingLocation() {
-    var elem = document.getElementById("Updating (Location)");
+    var tab = "Updating (Location)";
+    var elem = document.getElementById(tab);
     elem.appendChild(createInput());
     elem.appendChild(createLocations());
 
@@ -326,15 +329,15 @@ function initUpdatingLocation() {
             async.waterfall([
                 function(callback) {
                     console.log("Trying asset tag " + assetTag)
-                    callback(null, assetTag, "Updating (Location)");
+                    callback(null, assetTag);
                 },
                 getAssetID,
                 checkInAsset,
-                function(assetID, tab, callback) {
+                function(assetID, callback) {
                     var dataObj = {
                         "name": document.getElementById(tab).querySelectorAll("#textLocation")[0].value
                     };
-                    callback(null, assetID, tab, dataObj);
+                    callback(null, assetID, dataObj);
                 },
                 checkOutAsset,
                 function(callback) {
@@ -354,7 +357,8 @@ function initUpdatingLocation() {
 }
 
 function initUpdatingUser() {
-    var elem = document.getElementById("Updating (User)");
+    var tab = "Updating (User)";
+    var elem = document.getElementById(tab);
     elem.appendChild(createInput());
     elem.appendChild(createUsers());
 
@@ -370,15 +374,15 @@ function initUpdatingUser() {
             async.waterfall([
                 function(callback) {
                     console.log("Trying asset tag " + assetTag)
-                    callback(null, assetTag, "Updating (User)");
+                    callback(null, assetTag);
                 },
                 getAssetID,
                 checkInAsset,
-                function(assetID, tab, callback) {
+                function(assetID, callback) {
                     var dataObj = {
                         "user_id": document.getElementById(tab).querySelectorAll("#textUser")[0].value
                     };
-                    callback(null, assetID, tab, dataObj);
+                    callback(null, assetID, dataObj);
                 },
                 checkOutAsset,
                 function(callback) {

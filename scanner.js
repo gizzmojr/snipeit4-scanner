@@ -151,6 +151,9 @@ function getUsers() {
         var users = response.rows;
         var elemList = document.querySelectorAll('#textUser');
 
+        users.sort();
+        users.reverse();
+
         elemList.forEach(function(elem) {
             elem.disabled = false;
             users.forEach(function(user) {
@@ -159,7 +162,6 @@ function getUsers() {
                 option.text = user.name;
                 elem.appendChild(option);
             });
-            //TODO Sort the list reverse alphabetical
         });
     });
 }

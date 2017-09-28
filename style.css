@@ -11,7 +11,7 @@ p {
     margin: 5px;
 }
 
-div.users select {
+select {
     height: 25px;
 }
 

@@ -6,6 +6,7 @@ var apiToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjY5NDFmMTQ1MTk2ZTQ4
 var mainDomElement = "#scanner";
 var tabsArray = ['Check-in', 'Check-out', 'Updating (User)', 'Updating (Location)'];
 
+
 // "Private" global variables. Do not touch.
 
 function checkInAsset(assetID, callback) {
@@ -130,18 +131,23 @@ function getAssetIDArray(inputList) {
 
 function getLocations() {
     httpGet("/api/v1/locations", function(response) {
-        var users = response.rows;
+        var locations = response.rows;
         var elemList = document.querySelectorAll('#textLocation');
+
+        locations.sort(function(a, b){
+            if(a.name < b.name) return -1;
+            if(a.name > b.name) return 1;
+            return 0;
+        });
 
         elemList.forEach(function(elem) {
             elem.disabled = false;
-            users.forEach(function(user) {
+            locations.forEach(function(loc) {
                 var option = document.createElement("option");
-                option.value = user.id;
-                option.text = user.name;
+                option.value = loc.id;
+                option.text = loc.name;
                 elem.appendChild(option);
             });
-            //TODO Sort the list reverse alphabetical
         });
     });
 }

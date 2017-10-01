@@ -1,11 +1,13 @@
 The one of the following will need to be done on the Snipe-IT web server
 
-=== Server side
+=== Server side install
 
 Clone the project into <snipe-it_root_dir/public>
 
 === Client side
 NOTE: This document assumes Apache for webserver
+
+We change the webserver to allow CORS authorization.
 
 . Edit the virtualhost for Snipe-IT, adding the following;
 +
@@ -21,7 +23,7 @@ Header set Access-Control-Allow-Credentials true
 ----
 $ a2enmod headers
 ----
-. Example to run locally
+. Example run locally in the repo
 +
 ----
 $ python -m SimpleHTTPServer 8000

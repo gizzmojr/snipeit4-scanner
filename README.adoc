@@ -1,0 +1,28 @@
+The one of the following will need to be done on the Snipe-IT web server
+
+=== Server side
+
+Clone the project into <snipe-it_root_dir/public>
+
+=== Client side
+NOTE: This document assumes Apache for webserver
+
+. Edit the virtualhost for Snipe-IT, adding the following;
++
+----
+Header set Access-Control-Allow-Headers "CONTENT-TYPE, Authorization"
+Header set Access-Control-Allow-Methods "POST, GET, OPTIONS, PUT, DELETE"
+Header set Access-Control-Allow-Origin "http://localhost:8000"
+Header set Access-Control-Allow-Credentials true
+----
+* Modify the Origin as required, note that '*' is not allowed.
+. Enable header support
++
+----
+$ a2enmod headers
+----
+. Example to run locally
++
+----
+$ python -m SimpleHTTPServer 8000
+----

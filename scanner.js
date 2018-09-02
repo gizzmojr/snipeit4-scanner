@@ -2,6 +2,7 @@
 
 // Configuration options.
 var siteUrl = "http://snipeit.msec.local";
+var apiPrefix = "/api/v1";
 var apiToken = "";
 var mainDomElement = "#scanner";
 var tabsArray = ['Check-in', 'Check-out', 'Updating (User)', 'Updating (Location)'];
@@ -12,14 +13,14 @@ var tabsArray = ['Check-in', 'Check-out', 'Updating (User)', 'Updating (Location
 function checkInAsset(assetID, callback) {
     var dataObj = {
     };
-    httpPost("/api/v1/hardware/" + assetID + "/checkin", dataObj, function(response) {
+    httpPost(apiPrefix + "/hardware/" + assetID + "/checkin", dataObj, function(response) {
         //console.log(response.messages);
         callback(null, assetID);
     });
 }
 
 function checkOutAsset(assetID, dataObj, callback) {
-    httpPost("/api/v1/hardware/" + assetID + "/checkout", dataObj, function(response) {
+    httpPost(apiPrefix + "/hardware/" + assetID + "/checkout", dataObj, function(response) {
         console.log("Done with asset - " + assetID);
         callback(null);
     });
@@ -109,7 +110,7 @@ function createUsers() {
 }
 
 function getAssetID(assetTag, callback) {
-    httpGet("/api/v1/hardware?search=" + assetTag, function(response) {
+    httpGet(apiPrefix + "/hardware?search=" + assetTag, function(response) {
         if (response.total == 0 || response.total > 1) {
             callback("Invalid tag " + assetTag);
             //TODO might not be right
@@ -130,7 +131,7 @@ function getAssetIDArray(inputList) {
 }
 
 function getLocations() {
-    httpGet("/api/v1/locations", function(response) {
+    httpGet(apiPrefix + "/locations", function(response) {
         var locations = response.rows;
         var elemList = document.querySelectorAll('#textLocation');
 
@@ -153,7 +154,7 @@ function getLocations() {
 }
 
 function getUsers() {
-    httpGet("/api/v1/users", function(response) {
+    httpGet(apiPrefix + "/users", function(response) {
         var users = response.rows;
         var elemList = document.querySelectorAll('#textUser');
 

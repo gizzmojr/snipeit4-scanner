@@ -78,7 +78,7 @@ function createTabs() {
         btn.addEventListener("click", function() {
             openTab(event, this.innerHTML);
         });
-        if (tabsArray[tab] == "Updating (User)") {
+        if (tabsArray[tab] == "Updating (Location)") {
             btn.id = "defaultOpen";
         }
 

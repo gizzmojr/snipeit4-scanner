@@ -14,7 +14,7 @@ function checkInAsset(assetID, callback) {
     var dataObj = {
     };
     httpPost(apiPrefix + "/hardware/" + assetID + "/checkin", dataObj, function(response) {
-        callback(null, assetID);
+        callback(null);
     });
 }
 
@@ -105,6 +105,12 @@ function createUsers() {
 
     return usersDiv;
 
+}
+
+function doCheckin(assetID, callback) {
+    httpPost(apiPrefix + "/hardware/" + assetID + "/checkin", function(response) {
+        callback(null);
+    });
 }
 
 function getAssetID(assetTag, callback) {
@@ -328,24 +334,54 @@ function initUpdatingLocation() {
     submit.type = "button";
     submit.addEventListener("click", function() {
         var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
+        var locationObj = document.getElementById(tab).querySelectorAll("#textLocation")[0];
+        var locationID = locationObj.value;
+        var assetID = "";
+        var assetTag = "";
         for (var asset in assetArray) {
-            var assetTag = assetArray[asset];
+            assetTag = assetArray[asset];
             if (assetTag == "") { continue };
             async.waterfall([
+                // Console message
                 function(callback) {
-                    console.log("Trying asset tag " + assetTag)
+                    console.log("Trying asset tag " + assetTag);
+                    console.log("Using location " + locationObj[locationObj.selectedIndex].text);
                     callback(null, assetTag);
                 },
+                // Retrieve the asset ID
                 getAssetID,
-                checkInAsset,
-                function(assetID, callback) {
-                    var dataObj = {
-                        "name": document.getElementById(tab).querySelectorAll("#textLocation")[0].value
-                    };
-                    callback(null, assetID, dataObj);
+                // Check if item is already 'deployed'
+                function checkCheckout(assetIDcallback, callback) {
+                    assetID = assetIDcallback; // update function global var
+                    httpGet(apiPrefix + "/hardware/" + assetID, function(response) {
+                        callback(null, response);
+                    });
                 },
-                checkOutAsset,
+                // What to do based on response of deployed state
+                function(response, callback) {
+                    var statusMeta = response.status_label.status_meta;
+                    if (statusMeta == "deployed") {
+                        console.log("Need to checkin");
+                        checkInAsset(assetID, function() {
+                            callback(null);
+                        });
+                    } else {
+                        console.log("Already checked in");
+                        callback(null);
+                    }
+                },
+                // checkout for location based
                 function(callback) {
+                    var dataObj = {
+                        "id": assetID,
+                        "checkout_to_type": "location",
+                        "assigned_location": locationID
+                    };
+                    checkOutAsset(assetID, dataObj, callback);
+                },
+                function(callback, assetID) {
+//refactor to remove assetID
+                    callback(null, 'All done with ' + assetTag);
                     elem.querySelectorAll("textarea#inputarea")[0].value = "";
                 }
             ], function(error, result) {

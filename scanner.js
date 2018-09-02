@@ -14,7 +14,6 @@ function checkInAsset(assetID, callback) {
     var dataObj = {
     };
     httpPost(apiPrefix + "/hardware/" + assetID + "/checkin", dataObj, function(response) {
-        //console.log(response.messages);
         callback(null, assetID);
     });
 }

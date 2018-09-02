@@ -111,7 +111,6 @@ function getAssetID(assetTag, callback) {
     httpGet(apiPrefix + "/hardware?search=" + assetTag, function(response) {
         if (response.total == 0 || response.total > 1) {
             callback("Invalid tag " + assetTag);
-            //TODO might not be right
         } else {
             callback(null, response.rows[0].id);
         }

@@ -21,7 +21,6 @@ function checkInAsset(assetID, callback) {
 
 function checkOutAsset(assetID, dataObj, callback) {
     httpPost(apiPrefix + "/hardware/" + assetID + "/checkout", dataObj, function(response) {
-        console.log("Done with asset - " + assetID);
         callback(null);
     });
 }

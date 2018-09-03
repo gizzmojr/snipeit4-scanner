@@ -381,7 +381,7 @@ function initUpdatingLocation() {
                     checkOutAsset(assetID, dataObj, callback);
                 },
                 function(callback) {
-                    callback(null, 'All done with ' + assetTag);
+                    callback(null, "All done with " + assetTag);
                 }
             ], function(error, result) {
                 if (error) {

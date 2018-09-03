@@ -361,12 +361,12 @@ function initUpdatingLocation() {
                 function(response, callback) {
                     var statusMeta = response.status_label.status_meta;
                     if (statusMeta == "deployed") {
-                        console.log("Need to checkin");
+                        console.log("Need to check in");
                         checkInAsset(assetID, function() {
                             callback(null);
                         });
                     } else {
-                        console.log("Already checked in");
+                        console.log("Already checked out");
                         callback(null);
                     }
                 },

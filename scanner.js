@@ -292,23 +292,48 @@ function initCheckOut() {
     submit.type = "button";
     submit.addEventListener("click", function() {
         var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
+        var userObj = document.getElementById(tab).querySelectorAll("#textUser")[0];
+        var userID = userObj.value;
+        var assetID = "";
+        var assetTag = "";
         for (var asset in assetArray) {
-            var assetTag = assetArray[asset];
+            assetTag = assetArray[asset];
             if (assetTag == "") { continue };
             async.waterfall([
+                // Console message
                 function(callback) {
                     console.log("Trying asset tag " + assetTag)
                     callback(null, assetTag);
                 },
+                // Retrieve the asset ID
                 getAssetID,
-                function(assetID, callback) {
-                    var dataObj = {
-                        "user_id": document.getElementById(tab).querySelectorAll("#textUser")[0].value
-                    };
-                    callback(null, assetID, dataObj);
+                // Check if item is already 'deployed'
+                function checkCheckout(assetIDcallback, callback) {
+                    assetID = assetIDcallback; // update function global var
+                    httpGet(apiPrefix + "/hardware/" + assetID, function(response) {
+                        callback(null, response);
+                    });
                 },
-                checkOutAsset,
+                // What to do based on response of deployed state
+                function(response, callback) {
+                    var statusMeta = response.status_label.status_meta;
+                    if (statusMeta == "deployed") {
+                        callback("Already checked out. Doing nothing."); // drop out
+                    } else {
+                        callback(null);
+                    }
+                },
+                // checkout for user based
                 function(callback) {
+                    var dataObj = {
+                        "id": assetID,
+                        "checkout_to_type": "user",
+                        "assigned_user": userID
+                    };
+                    checkOutAsset(assetID, dataObj, callback);
+                },
+                function(callback) {
+                    callback(null, "All done with " + assetTag);
                 }
             ], function(error, result) {
                 if (error) {

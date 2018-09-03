@@ -11,6 +11,7 @@ var tabsArray = ['Check-in', 'Check-out', 'Updating (User)', 'Updating (Location
 // "Private" global variables. Do not touch.
 
 function checkInAsset(assetID, callback) {
+    console.log("Checking in asset");
     var dataObj = {
     };
     httpPost(apiPrefix + "/hardware/" + assetID + "/checkin", dataObj, function(response) {
@@ -19,6 +20,7 @@ function checkInAsset(assetID, callback) {
 }
 
 function checkOutAsset(assetID, dataObj, callback) {
+    console.log("Checking out asset");
     httpPost(apiPrefix + "/hardware/" + assetID + "/checkout", dataObj, function(response) {
         callback(null);
     });
@@ -361,7 +363,6 @@ function initUpdatingLocation() {
                 function(response, callback) {
                     var statusMeta = response.status_label.status_meta;
                     if (statusMeta == "deployed") {
-                        console.log("Need to check in");
                         checkInAsset(assetID, function() {
                             callback(null);
                         });

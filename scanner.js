@@ -379,8 +379,7 @@ function initUpdatingLocation() {
                     };
                     checkOutAsset(assetID, dataObj, callback);
                 },
-                function(callback, assetID) {
-//refactor to remove assetID
+                function(callback) {
                     callback(null, 'All done with ' + assetTag);
                     elem.querySelectorAll("textarea#inputarea")[0].value = "";
                 }

@@ -7,7 +7,7 @@ Clone the project into <snipe-it_root_dir/public>
 === Client side
 NOTE: This document assumes Apache for webserver
 
-We change the webserver to allow CORS authorization.
+We change the webserver to allow CORS authorization. This is only for easy development but lots of security risks involved. Have an understanding on how CORS works before proceeding.
 
 . Edit the virtualhost for Snipe-IT, adding the following;
 +

@@ -307,7 +307,6 @@ function initCheckOut() {
                 },
                 checkOutAsset,
                 function(callback) {
-                    elem.querySelectorAll("textarea#inputarea")[0].value = "";
                 }
             ], function(error, result) {
                 if (error) {
@@ -317,6 +316,7 @@ function initCheckOut() {
                 }
             });
         }
+        elem.querySelectorAll("textarea#inputarea")[0].value = "";
     });
 
     elem.appendChild(submit);
@@ -381,7 +381,6 @@ function initUpdatingLocation() {
                 },
                 function(callback) {
                     callback(null, 'All done with ' + assetTag);
-                    elem.querySelectorAll("textarea#inputarea")[0].value = "";
                 }
             ], function(error, result) {
                 if (error) {
@@ -391,6 +390,7 @@ function initUpdatingLocation() {
                 }
             });
         }
+        elem.querySelectorAll("textarea#inputarea")[0].value = "";
     });
 
     elem.appendChild(submit);

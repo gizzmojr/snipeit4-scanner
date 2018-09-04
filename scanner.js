@@ -5,7 +5,7 @@ var siteUrl = "http://snipeit.msec.local";
 var apiPrefix = "/api/v1";
 var apiToken = "";
 var mainDomElement = "#scanner";
-var tabsArray = ['Check-in', 'Check-out', 'Updating (User)', 'Updating (Location)'];
+var tabsArray = ['Check-in', 'Checkout/Updating (User)', 'Checkout/Updating (Location)'];
 
 
 // "Private" global variables. Do not touch.
@@ -103,7 +103,7 @@ function createTabs() {
         btn.addEventListener("click", function() {
             openTab(event, this.innerHTML);
         });
-        if (tabsArray[tab] == "Updating (Location)") {
+        if (tabsArray[tab] == "Checkout/Updating (Location)") {
             btn.id = "defaultOpen";
         }
 
@@ -303,7 +303,7 @@ function initCheckIn() {
 }
 
 function initUpdatingLocation() {
-    var tab = "Updating (Location)";
+    var tab = "Checkout/Updating (Location)";
     var elem = document.getElementById(tab);
     elem.appendChild(createInput());
     elem.appendChild(createLocations());
@@ -368,7 +368,7 @@ function initUpdatingLocation() {
 }
 
 function initUpdatingUser() {
-    var tab = "Updating (User)";
+    var tab = "Checkout/Updating (User)";
     var elem = document.getElementById(tab);
     elem.appendChild(createInput());
     elem.appendChild(createUsers());

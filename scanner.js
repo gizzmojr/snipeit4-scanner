@@ -9,6 +9,7 @@ var tabsArray = ['Check-in', 'Check-out', 'Updating (User)', 'Updating (Location
 
 
 // "Private" global variables. Do not touch.
+var blankMsg = "\tEmpty value, skipping";
 
 function checkBlank(assetTag, callback) {
     if (assetTag == "") {
@@ -386,7 +387,6 @@ function initUpdatingLocation() {
         var locationObj = document.getElementById(tab).querySelectorAll("#textLocation")[0];
         var locationID = locationObj.value;
         var assetID = "";
-        var blankMsg = "\tEmpty value, skipping";
         async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
             async.waterfall([
                 function(callback) {

@@ -36,14 +36,14 @@ function checkIfDeployed(assetID, callback) {
 function checkInAsset(assetID, callback) {
     var dataObj = {
     };
-    httpPost(apiPrefix + "/hardware/" + assetID + "/checkin", dataObj, function(response) {
+    httpPost(apiPrefix + "/hardware/" + assetID + "/checkin", dataObj, function() {
         console.log("\tChecked in " + assetID);
         callback(null);
     });
 }
 
 function checkOutAsset(assetID, dataObj, callback) {
-    httpPost(apiPrefix + "/hardware/" + assetID + "/checkout", dataObj, function(response) {
+    httpPost(apiPrefix + "/hardware/" + assetID + "/checkout", dataObj, function() {
         console.log("\tChecked out " + assetID + " to location " + dataObj.assigned_location);
         callback(null);
     });

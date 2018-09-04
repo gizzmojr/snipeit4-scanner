@@ -68,21 +68,25 @@ function createInput() {
 }
 
 function createLocations() {
-    var usersDiv = document.createElement("div");
-    usersDiv.className = "locations";
+    var locationsDiv = document.createElement("div");
+    locationsDiv.className = "locations";
 
-    var userLabel = document.createElement("p");
-    userLabel.innerText = "Check-out to the following";
+    var locationLabel = document.createElement("p");
+    locationLabel.innerText = "Check-out to the following";
 
-    var userList = document.createElement("select");
-    userList.id = "textLocation";
-    userList.name = "location";
-    userList.disabled = "true";
+    var locationList = document.createElement("select");
+    locationList.id = "textLocation";
+    locationList.name = "location";
+    locationList.disabled = "true";
 
-    usersDiv.appendChild(userLabel);
-    usersDiv.appendChild(userList);
+    var locationLabel = document.createElement("p");
+    locationLabel.innerText = "Check-out to the following";
 
-    return usersDiv;
+
+    locationsDiv.appendChild(locationLabel);
+    locationsDiv.appendChild(locationList);
+
+    return locationsDiv;
 
 }
 

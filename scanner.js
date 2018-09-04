@@ -257,7 +257,6 @@ function initScanner(callback) {
     initUpdatingLocation();
     initUpdatingUser();
     initCheckIn();
-    initCheckOut();
 
     getLocations();
     getUsers();
@@ -298,75 +297,6 @@ function initCheckIn() {
                 }
             });
         }
-    });
-
-    elem.appendChild(submit);
-}
-
-function initCheckOut() {
-    var tab = "Check-out";
-    var elem = document.getElementById(tab);
-    elem.appendChild(createInput());
-    elem.appendChild(createUsers());
-
-    var submit = document.createElement("button");
-    submit.id = "btnSubmit";
-    submit.innerText = "Submit";
-    submit.type = "button";
-    submit.addEventListener("click", function() {
-        var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
-        var userObj = document.getElementById(tab).querySelectorAll("#textUser")[0];
-        var userID = userObj.value;
-        var assetID = "";
-        var assetTag = "";
-        for (var asset in assetArray) {
-            assetTag = assetArray[asset];
-            if (assetTag == "") { continue };
-            async.waterfall([
-                // Console message
-                function(callback) {
-                    console.log("Trying asset tag " + assetTag)
-                    callback(null, assetTag);
-                },
-                // Retrieve the asset ID
-                getAssetID,
-                // Check if item is already 'deployed'
-                function checkCheckout(assetIDcallback, callback) {
-                    assetID = assetIDcallback; // update function global var
-                    httpGet(apiPrefix + "/hardware/" + assetID, function(response) {
-                        callback(null, response);
-                    });
-                },
-                // What to do based on response of deployed state
-                function(response, callback) {
-                    var statusMeta = response.status_label.status_meta;
-                    if (statusMeta == "deployed") {
-                        callback("Already checked out. Doing nothing."); // drop out
-                    } else {
-                        callback(null);
-                    }
-                },
-                // checkout for user based
-                function(callback) {
-                    var dataObj = {
-                        "id": assetID,
-                        "checkout_to_type": "user",
-                        "assigned_user": userID
-                    };
-                    checkOutAsset(assetID, dataObj, callback);
-                },
-                function(callback) {
-                    callback(null, "All done with " + assetTag);
-                }
-            ], function(error, result) {
-                if (error) {
-                    console.log(error);
-                } else {
-                    console.log(result);
-                }
-            });
-        }
-        elem.querySelectorAll("textarea#inputarea")[0].value = "";
     });
 
     elem.appendChild(submit);

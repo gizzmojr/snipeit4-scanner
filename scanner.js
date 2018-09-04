@@ -10,6 +10,28 @@ var tabsArray = ['Check-in', 'Check-out', 'Updating (User)', 'Updating (Location
 
 // "Private" global variables. Do not touch.
 
+function checkBlank(assetTag, callback) {
+    if (assetTag == "") {
+        callback(blankMsg);
+    } else {
+        callback(null, assetTag);
+    };
+}
+
+function checkIfDeployed(assetID, callback) {
+    httpGet(apiPrefix + "/hardware/" + assetID, function(response, status_callback) {
+        var statusMeta = response.status_label.status_meta;
+        if (statusMeta == "deployed") {
+            console.log("\tNeed to check in first");
+            checkInAsset(assetID, function() {
+                callback(null);
+            });
+        } else {
+            callback(null);
+        }
+    });
+}
+
 function checkInAsset(assetID, callback) {
     var dataObj = {
     };
@@ -367,40 +389,17 @@ function initUpdatingLocation() {
         var blankMsg = "\tEmpty value, skipping";
         async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
             async.waterfall([
-                // Console message
                 function(callback) {
                     console.log("Trying asset tag " + assetTag);
                     callback(null, assetTag);
                 },
-                function(assetTag, callback) {
-                    if (assetTag == "") {
-                        callback(blankMsg);
-                    } else {
-                        callback(null, assetTag);
-                    };
-                },
-                // Retrieve the asset ID
+                checkBlank,
                 getAssetID,
-                // Check if item is already 'deployed'
-                function(assetIDcallback, callback) {
-                    assetID = assetIDcallback; // update function global var
-                    httpGet(apiPrefix + "/hardware/" + assetID, function(response) {
-                        callback(null, response);
-                    });
+                function(assetID_callback, callback) {
+                    assetID = assetID_callback; // Update function variable
+                    callback(null, assetID);
                 },
-                // What to do based on response
-                function(response, callback) {
-                    var statusMeta = response.status_label.status_meta;
-                    if (statusMeta == "deployed") {
-                        console.log("\tNeed to check in first");
-                        checkInAsset(assetID, function() {
-                            callback(null);
-                        });
-                    } else {
-                        callback(null);
-                    }
-                },
-                // checkout for location based
+                checkIfDeployed,
                 function(callback) {
                     var dataObj = {
                         "id": assetID,

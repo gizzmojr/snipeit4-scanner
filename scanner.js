@@ -11,17 +11,17 @@ var tabsArray = ['Check-in', 'Check-out', 'Updating (User)', 'Updating (Location
 // "Private" global variables. Do not touch.
 
 function checkInAsset(assetID, callback) {
-    console.log("Checking in asset");
     var dataObj = {
     };
     httpPost(apiPrefix + "/hardware/" + assetID + "/checkin", dataObj, function(response) {
+        console.log("\tChecked in " + assetID);
         callback(null);
     });
 }
 
 function checkOutAsset(assetID, dataObj, callback) {
-    console.log("Checking out asset");
     httpPost(apiPrefix + "/hardware/" + assetID + "/checkout", dataObj, function(response) {
+        console.log("\tChecked out " + assetID + " to location " + dataObj.assigned_location);
         callback(null);
     });
 }
@@ -364,35 +364,39 @@ function initUpdatingLocation() {
         var locationObj = document.getElementById(tab).querySelectorAll("#textLocation")[0];
         var locationID = locationObj.value;
         var assetID = "";
-        var assetTag = "";
-        for (var asset in assetArray) {
-            assetTag = assetArray[asset];
-            if (assetTag == "") { continue };
+        var blankMsg = "\tEmpty value, skipping";
+        async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
             async.waterfall([
                 // Console message
                 function(callback) {
                     console.log("Trying asset tag " + assetTag);
-                    console.log("Using location " + locationObj[locationObj.selectedIndex].text);
                     callback(null, assetTag);
+                },
+                function(assetTag, callback) {
+                    if (assetTag == "") {
+                        callback(blankMsg);
+                    } else {
+                        callback(null, assetTag);
+                    };
                 },
                 // Retrieve the asset ID
                 getAssetID,
                 // Check if item is already 'deployed'
-                function checkCheckout(assetIDcallback, callback) {
+                function(assetIDcallback, callback) {
                     assetID = assetIDcallback; // update function global var
                     httpGet(apiPrefix + "/hardware/" + assetID, function(response) {
                         callback(null, response);
                     });
                 },
-                // What to do based on response of deployed state
+                // What to do based on response
                 function(response, callback) {
                     var statusMeta = response.status_label.status_meta;
                     if (statusMeta == "deployed") {
+                        console.log("\tNeed to check in first");
                         checkInAsset(assetID, function() {
                             callback(null);
                         });
                     } else {
-                        console.log("Already checked out");
                         callback(null);
                     }
                 },
@@ -406,17 +410,29 @@ function initUpdatingLocation() {
                     checkOutAsset(assetID, dataObj, callback);
                 },
                 function(callback) {
-                    callback(null, "All done with " + assetTag);
+                    callback(null, "Done");
                 }
             ], function(error, result) {
-                if (error) {
+                if (error === blankMsg) {
+                    // Just to break out of waterfall
+                    console.log(error);
+                    error = undefined;
+                } else if (error) {
                     console.log(error);
                 } else {
                     console.log(result);
-                }
+                };
+                assetArrayCallback(error, result);
             });
-        }
-        elem.querySelectorAll("textarea#inputarea")[0].value = "";
+        }, function(error, result) {
+            if (error) {
+                console.log("Fatal - Stopped checking");
+                alert("Something went wrong\nCheck console for error");
+            } else {
+                elem.querySelectorAll("textarea#inputarea")[0].value = "";
+                console.log("Done everything, cleared inputs");
+            }
+        });
     });
 
     elem.appendChild(submit);

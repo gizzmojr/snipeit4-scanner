@@ -156,6 +156,7 @@ function doCheckin(elem, tab) {
         });
     }
 }
+
 function doLocation(elem, tab) {
     var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
     var locationObj = document.getElementById(tab).querySelectorAll("#textLocation")[0];
@@ -207,6 +208,56 @@ function doLocation(elem, tab) {
         }
     });
 }
+
+function doUser(elem, tab) {
+    var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
+    var userObj = document.getElementById(tab).querySelectorAll("#textUser")[0];
+    var userID = userObj.value;
+    var assetID = "";
+    async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
+        async.waterfall([
+            function(callback) {
+                console.log("Trying asset tag " + assetTag);
+                callback(null, assetTag);
+            },
+            checkBlank,
+            getAssetID,
+            function(assetID_callback, callback) {
+                assetID = assetID_callback; // Update function variable
+                callback(null, assetID);
+            },
+            checkIfDeployed,
+            function(callback) {
+                var dataObj = {
+                    "id": assetID,
+                    "checkout_to_type": "user",
+                    "assigned_user": userID
+                };
+                checkOutAsset(assetID, dataObj, callback);
+            },
+            function(callback) {
+                callback(null, "Done");
+            }
+        ], function(error, result) {
+            if (error === blankMsg) {
+                // Just to break out of waterfall
+                console.log(error);
+                error = undefined;
+            } else if (error) {
+                console.log(error);
+            } else {
+                console.log(result);
+            };
+            assetArrayCallback(error, result);
+        });
+    }, function(error, result) {
+        if (error) {
+            console.log("Fatal - Stopped checking");
+            alert("Something went wrong\nCheck console for error");
+        } else {
+            elem.querySelectorAll("textarea#inputarea")[0].value = "";
+            console.log("Done everything, cleared inputs");
+        }
     });
 }
 
@@ -381,55 +432,7 @@ function initUpdatingUser() {
     submit.innerText = "Submit";
     submit.type = "button";
     submit.addEventListener("click", function() {
-        var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
-        var userObj = document.getElementById(tab).querySelectorAll("#textUser")[0];
-        var userID = userObj.value;
-        var assetID = "";
-        async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
-            async.waterfall([
-                function(callback) {
-                    console.log("Trying asset tag " + assetTag);
-                    callback(null, assetTag);
-                },
-                checkBlank,
-                getAssetID,
-                function(assetID_callback, callback) {
-                    assetID = assetID_callback; // Update function variable
-                    callback(null, assetID);
-                },
-                checkIfDeployed,
-                function(callback) {
-                    var dataObj = {
-                        "id": assetID,
-                        "checkout_to_type": "user",
-                        "assigned_user": userID
-                    };
-                    checkOutAsset(assetID, dataObj, callback);
-                },
-                function(callback) {
-                    callback(null, "Done");
-                }
-            ], function(error, result) {
-                if (error === blankMsg) {
-                    // Just to break out of waterfall
-                    console.log(error);
-                    error = undefined;
-                } else if (error) {
-                    console.log(error);
-                } else {
-                    console.log(result);
-                };
-                assetArrayCallback(error, result);
-            });
-        }, function(error, result) {
-            if (error) {
-                console.log("Fatal - Stopped checking");
-                alert("Something went wrong\nCheck console for error");
-            } else {
-                elem.querySelectorAll("textarea#inputarea")[0].value = "";
-                console.log("Done everything, cleared inputs");
-            }
-        });
+        doUser(elem, tab);
     });
 
     elem.appendChild(submit);

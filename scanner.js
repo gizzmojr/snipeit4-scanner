@@ -449,34 +449,54 @@ function initUpdatingUser() {
     submit.type = "button";
     submit.addEventListener("click", function() {
         var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
-        for (var asset in assetArray) {
-            var assetTag = assetArray[asset];
-            if (assetTag == "") { continue };
+        var userObj = document.getElementById(tab).querySelectorAll("#textUser")[0];
+        var userID = userObj.value;
+        var assetID = "";
+        async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
             async.waterfall([
                 function(callback) {
-                    console.log("Trying asset tag " + assetTag)
+                    console.log("Trying asset tag " + assetTag);
                     callback(null, assetTag);
                 },
+                checkBlank,
                 getAssetID,
-                checkInAsset,
-                function(assetID, callback) {
-                    var dataObj = {
-                        "user_id": document.getElementById(tab).querySelectorAll("#textUser")[0].value
-                    };
-                    callback(null, assetID, dataObj);
+                function(assetID_callback, callback) {
+                    assetID = assetID_callback; // Update function variable
+                    callback(null, assetID);
                 },
-                checkOutAsset,
+                checkIfDeployed,
                 function(callback) {
-                    elem.querySelectorAll("textarea#inputarea")[0].value = "";
+                    var dataObj = {
+                        "id": assetID,
+                        "checkout_to_type": "user",
+                        "assigned_user": userID
+                    };
+                    checkOutAsset(assetID, dataObj, callback);
+                },
+                function(callback) {
+                    callback(null, "Done");
                 }
             ], function(error, result) {
-                if (error) {
+                if (error === blankMsg) {
+                    // Just to break out of waterfall
+                    console.log(error);
+                    error = undefined;
+                } else if (error) {
                     console.log(error);
                 } else {
                     console.log(result);
-                }
+                };
+                assetArrayCallback(error, result);
             });
-        }
+        }, function(error, result) {
+            if (error) {
+                console.log("Fatal - Stopped checking");
+                alert("Something went wrong\nCheck console for error");
+            } else {
+                elem.querySelectorAll("textarea#inputarea")[0].value = "";
+                console.log("Done everything, cleared inputs");
+            }
+        });
     });
 
     elem.appendChild(submit);

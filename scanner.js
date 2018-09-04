@@ -44,7 +44,7 @@ function checkInAsset(assetID, callback) {
 
 function checkOutAsset(assetID, dataObj, callback) {
     httpPost(apiPrefix + "/hardware/" + assetID + "/checkout", dataObj, function() {
-        console.log("\tChecked out " + assetID + " to location " + dataObj.assigned_location);
+        console.log("\tChecked out " + assetID);
         callback(null);
     });
 }

@@ -79,10 +79,6 @@ function createLocations() {
     locationList.name = "location";
     locationList.disabled = "true";
 
-    var locationLabel = document.createElement("p");
-    locationLabel.innerText = "Check-out to the following";
-
-
     locationsDiv.appendChild(locationLabel);
     locationsDiv.appendChild(locationList);
 

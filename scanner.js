@@ -49,6 +49,24 @@ function checkOutAsset(assetID, dataObj, callback) {
     });
 }
 
+function createAudit() {
+    var auditDiv = document.createElement("div");
+    auditDiv.className = "audit";
+    var auditLabel = document.createElement("p");
+    auditLabel.innerText = "Update Audit date?";
+
+    var checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "audit";
+    checkbox.checked = true;
+    checkbox.id = "audit";
+
+    auditDiv.appendChild(auditLabel);
+    auditDiv.appendChild(checkbox);
+
+    return auditDiv;
+}
+
 function createInput() {
     var inputDiv = document.createElement("div");
     inputDiv.className = "input";
@@ -132,6 +150,13 @@ function createUsers() {
 
 }
 
+function doAudit(dataObj, callback) {
+    httpPost(apiPrefix + "/hardware/audit", dataObj, function() {
+        console.log("\tAudit marked audited");
+        callback(null);
+    });
+}
+
 function doCheckin(elem, tab) {
     var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
     for (var asset in assetArray) {
@@ -184,6 +209,33 @@ function doLocation(elem, tab) {
                 checkOutAsset(assetID, dataObj, callback);
             },
             function(callback) {
+                if (document.getElementById(tab).querySelectorAll("#audit")[0].checked) {
+                    var today = new Date();
+                    var dd = today.getDate();
+                    var mm = today.getMonth()+1; //January is 0!
+                    var yyyy = today.getFullYear();
+                    var nextyear = yyyy + 1;
+
+                    if(dd<10) {
+                        dd = '0'+dd
+                    };
+
+                    if(mm<10) {
+                        mm = '0'+mm
+                    };
+
+                    var dataObj = {
+                        "asset_tag": assetTag,
+                        "note": "",
+                        "location_id": locationID,
+                        "next_audit_date": nextyear + "-" + mm + "-" + dd
+                    };
+                    doAudit(dataObj, callback);
+                } else {
+                    callback(null)
+                }
+            },
+            function(callback) {
                 callback(null, "Done");
             }
         ], function(error, result) {
@@ -234,6 +286,32 @@ function doUser(elem, tab) {
                     "assigned_user": userID
                 };
                 checkOutAsset(assetID, dataObj, callback);
+            },
+            function(callback) {
+                if (document.getElementById(tab).querySelectorAll("#audit")[0].checked) {
+                    var today = new Date();
+                    var dd = today.getDate();
+                    var mm = today.getMonth()+1; //January is 0!
+                    var yyyy = today.getFullYear();
+                    var nextyear = yyyy + 1;
+
+                    if(dd<10) {
+                        dd = '0'+dd
+                    };
+
+                    if(mm<10) {
+                        mm = '0'+mm
+                    };
+
+                    var dataObj = {
+                        "asset_tag": assetTag,
+                        "note": "",
+                        "next_audit_date": nextyear + "-" + mm + "-" + dd
+                    };
+                    doAudit(dataObj, callback);
+                } else {
+                    callback(null)
+                }
             },
             function(callback) {
                 callback(null, "Done");
@@ -408,6 +486,7 @@ function initLocation() {
     var tab = "Checkout/Updating (Location)";
     var elem = document.getElementById(tab);
     elem.appendChild(createInput());
+    elem.appendChild(createAudit());
     elem.appendChild(createLocations());
 
     var submit = document.createElement("button");
@@ -425,6 +504,7 @@ function initUser() {
     var tab = "Checkout/Updating (User)";
     var elem = document.getElementById(tab);
     elem.appendChild(createInput());
+    elem.appendChild(createAudit());
     elem.appendChild(createUsers());
 
     var submit = document.createElement("button");

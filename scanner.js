@@ -408,7 +408,7 @@ function initCheckIn() {
     elem.appendChild(submit);
 }
 
-function initUpdatingLocation() {
+function initLocation() {
     var tab = "Checkout/Updating (Location)";
     var elem = document.getElementById(tab);
     elem.appendChild(createInput());
@@ -425,7 +425,7 @@ function initUpdatingLocation() {
     elem.appendChild(submit);
 }
 
-function initUpdatingUser() {
+function initUser() {
     var tab = "Checkout/Updating (User)";
     var elem = document.getElementById(tab);
     elem.appendChild(createInput());

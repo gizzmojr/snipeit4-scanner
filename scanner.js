@@ -159,27 +159,39 @@ function doAudit(dataObj, callback) {
 
 function doCheckin(elem, tab) {
     var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
-    for (var asset in assetArray) {
-        var assetTag = assetArray[asset];
-        if (assetTag == "") { continue };
+    async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
         async.waterfall([
             function(callback) {
                 console.log("Trying asset tag " + assetTag)
                 callback(null, assetTag);
             },
+            checkBlank,
             getAssetID,
             checkInAsset,
             function(callback) {
-                elem.querySelectorAll("textarea#inputarea")[0].value = "";
+                callback(null, "Done");
             }
         ], function(error, result) {
-            if (error) {
+            if (error === blankMsg) {
+                // Just to break out of waterfall
+                console.log(error);
+                error = undefined;
+            } else if (error) {
                 console.log(error);
             } else {
                 console.log(result);
-            }
+            };
+            assetArrayCallback(error, result);
         });
-    }
+    }, function(error, result) {
+        if (error) {
+            console.log("Fatal - Stopped checking");
+            alert("Something went wrong\nCheck console for error");
+        } else {
+            elem.querySelectorAll("textarea#inputarea")[0].value = "";
+            console.log("Done everything, cleared inputs");
+        }
+    });
 }
 
 function doLocation(elem, tab) {

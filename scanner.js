@@ -377,8 +377,8 @@ function httpRequest(method, url, dataObj, successCallback, errorCallback) {
 }
 function initScanner(callback) {
     createTabs();
-    initUpdatingLocation();
-    initUpdatingUser();
+    initLocation();
+    initUser();
     initCheckIn();
 
     getLocations();

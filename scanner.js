@@ -53,7 +53,7 @@ function createAudit() {
     var auditDiv = document.createElement("div");
     auditDiv.className = "audit";
     var auditLabel = document.createElement("p");
-    auditLabel.innerText = "Update Audit date?";
+    auditLabel.innerText = "Update audit date? (1yr)";
 
     var checkbox = document.createElement("input");
     checkbox.type = "checkbox";

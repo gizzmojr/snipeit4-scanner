@@ -101,7 +101,6 @@ function createLocations() {
     locationsDiv.appendChild(locationList);
 
     return locationsDiv;
-
 }
 
 function createTabs() {
@@ -128,7 +127,6 @@ function createTabs() {
         tabsDiv.appendChild(btn);
         document.querySelector(mainDomElement).appendChild(btnDiv);
     }
-
 }
 
 function createUsers() {
@@ -147,7 +145,6 @@ function createUsers() {
     usersDiv.appendChild(userList);
 
     return usersDiv;
-
 }
 
 function doAudit(dataObj, callback) {

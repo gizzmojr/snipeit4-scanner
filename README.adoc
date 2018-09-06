@@ -1,1 +1,16 @@
-Clone the project into <snipe-it_root_dir/public>
+== Introduction
+The purpose of this project was to work around a few current limitations of Snipe-IT using the v4 API. This was done for my own needs, in hopes it gets depricated into future features of Snipe-IT.
+
+It doesn't have to look good, just needs to work. Built with barcode scanner usage in mind, something that adds a CR/LF at the end. 
+
+== Features
+* Bulk checking out to user and location
+* Bulk updating asset user and location
+* Bulk checking in assets
+* Ability to set next audit date to one year on updating assets
+
+== Installation
+
+1. Clone the project into <snipe-it_root_dir/public>
+1. Add your API key in scanner.js
+1. Access http://<snipeiturl>/scanner with any modern web browser

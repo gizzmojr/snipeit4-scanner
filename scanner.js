@@ -152,7 +152,7 @@ function createUsers() {
 
 function doAudit(dataObj, callback) {
     httpPost(apiPrefix + "/hardware/audit", dataObj, function() {
-        console.log("\tAudit marked audited");
+        console.log("\tAsset marked for audit at " + dataObj.next_audit_date);
         callback(null);
     });
 }

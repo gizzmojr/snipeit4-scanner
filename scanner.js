@@ -465,6 +465,7 @@ function httpRequest(method, url, dataObj, successCallback, errorCallback) {
     xhr.setRequestHeader("Authorization", 'Bearer ' + apiToken);
     xhr.send(JSON.stringify(payload));
 }
+
 function initScanner(callback) {
     createTabs();
     initLocation();

@@ -13,4 +13,6 @@ It doesn't have to look good, just needs to work. Built with barcode scanner usa
 
 1. Clone the project into <snipe-it_root_dir/public>
 1. Add your API key in scanner.js
-1. Access http://<snipeiturl>/scanner with any modern web browser
+1. Access http://<snipeiturl>/snipeit4-scanner with any modern web browser
+
+NOTE: Check folder/file ownership for the webserver (chmod -R www-data:www-data <path_to_checkout>)

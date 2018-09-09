@@ -19,16 +19,23 @@ function checkBlank(assetTag, callback) {
     };
 }
 
-function checkIfDeployed(assetID, callback) {
+function checkIfDeployed(assetID, assignedID, callback) {
+/*
+    0 = not deployed
+    1 = deployed, but needs updating
+    2 = deployed, already assigned
+*/
     httpGet(apiPrefix + "/hardware/" + assetID, function(response, status_callback) {
-        var statusMeta = response.status_label.status_meta;
-        if (statusMeta == "deployed") {
-            console.log("\tNeed to check in first");
-            checkInAsset(assetID, function() {
-                callback(null);
-            });
+        if (response.status_label.status_meta == "deployed") {
+            if (response.assigned_to.id == assignedID) {
+                console.log("\tAlready assigned correctly");
+                callback(null, 2);
+            } else {
+                console.log("\tAlready assigned, updating");
+                callback(null, 1);
+            };
         } else {
-            callback(null);
+            callback(null, 0);
         }
     });
 }
@@ -206,16 +213,27 @@ function doLocation(elem, tab) {
             getAssetID,
             function(assetID_callback, callback) {
                 assetID = assetID_callback; // Update function variable
-                callback(null, assetID);
+                callback(null, assetID, locationID);
             },
             checkIfDeployed,
-            function(callback) {
+            function(deployedState, callback) {
                 var dataObj = {
                     "id": assetID,
                     "checkout_to_type": "location",
                     "assigned_location": locationID
                 };
-                checkOutAsset(assetID, dataObj, callback);
+                switch(deployedState) {
+                    case 0:
+                        checkOutAsset(assetID, dataObj, callback);
+                        break;
+                    case 1:
+                        checkInAsset(assetID, function() {
+                            checkOutAsset(assetID, dataObj, callback);
+                        });
+                        break;
+                    case 2:
+                        callback(null);
+                };
             },
             function(callback) {
                 if (document.getElementById(tab).querySelectorAll("#audit")[0].checked) {
@@ -285,16 +303,28 @@ function doUser(elem, tab) {
             getAssetID,
             function(assetID_callback, callback) {
                 assetID = assetID_callback; // Update function variable
-                callback(null, assetID);
+                callback(null, assetID, userID);
             },
             checkIfDeployed,
-            function(callback) {
+            function(deployedState, callback) {
+            function(isDeployed, callback) {
                 var dataObj = {
                     "id": assetID,
                     "checkout_to_type": "user",
                     "assigned_user": userID
                 };
-                checkOutAsset(assetID, dataObj, callback);
+                switch(deployedState) {
+                    case 0:
+                        checkOutAsset(assetID, dataObj, callback);
+                        break;
+                    case 1:
+                        checkInAsset(assetID, function() {
+                            checkOutAsset(assetID, dataObj, callback);
+                        });
+                        break;
+                    case 2:
+                        callback(null);
+                };
             },
             function(callback) {
                 if (document.getElementById(tab).querySelectorAll("#audit")[0].checked) {

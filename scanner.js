@@ -108,6 +108,7 @@ function createLocations() {
     locationsDiv.appendChild(locationList);
 
     return locationsDiv;
+
 }
 
 function createTabs() {
@@ -134,6 +135,7 @@ function createTabs() {
         tabsDiv.appendChild(btn);
         document.querySelector(mainDomElement).appendChild(btnDiv);
     }
+
 }
 
 function createUsers() {
@@ -152,6 +154,7 @@ function createUsers() {
     usersDiv.appendChild(userList);
 
     return usersDiv;
+
 }
 
 function doAudit(dataObj, callback) {
@@ -307,7 +310,6 @@ function doUser(elem, tab) {
             },
             checkIfDeployed,
             function(deployedState, callback) {
-            function(isDeployed, callback) {
                 var dataObj = {
                     "id": assetID,
                     "checkout_to_type": "user",

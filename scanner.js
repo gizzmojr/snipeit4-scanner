@@ -474,6 +474,9 @@ function httpRequest(method, url, dataObj, successCallback, errorCallback) {
             var obj = JSON.parse(response);
             if (this.status == 200) {
                 return successCallback(obj);
+            } else if (this.status == 401) {
+                alert(obj.error);
+                return;
             }
 
             if (obj.error !== null) {

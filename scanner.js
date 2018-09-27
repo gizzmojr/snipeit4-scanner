@@ -100,7 +100,7 @@ function createLocations() {
     locationLabel.innerText = "Check-out to the following";
 
     var locationList = document.createElement("select");
-    locationList.id = "textLocation";
+    locationList.id = "selectList";
     locationList.name = "location";
     locationList.disabled = "true";
 
@@ -146,7 +146,7 @@ function createUsers() {
     userLabel.innerText = "Check-out to the following";
 
     var userList = document.createElement("select");
-    userList.id = "textUser";
+    userList.id = "selectList";
     userList.name = "user";
     userList.disabled = "true";
 
@@ -155,6 +155,11 @@ function createUsers() {
 
     return usersDiv;
 
+}
+
+function disableInput(elem) {
+    elem.querySelectorAll("#selectList")[0].disabled = true;
+    elem.querySelectorAll("#btnSubmit")[0].disabled = true;
 }
 
 function doAudit(dataObj, callback) {
@@ -167,6 +172,7 @@ function doAudit(dataObj, callback) {
 function doCheckin(elem, tab) {
     var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
+        disableInput(elem);
         async.waterfall([
             function(callback) {
                 console.log("Trying asset tag " + assetTag)
@@ -203,10 +209,11 @@ function doCheckin(elem, tab) {
 
 function doLocation(elem, tab) {
     var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
-    var locationObj = document.getElementById(tab).querySelectorAll("#textLocation")[0];
+    var locationObj = document.getElementById(tab).querySelectorAll("#selectList")[0];
     var locationID = locationObj.value;
     var assetID = "";
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
+        disableInput(elem);
         async.waterfall([
             function(callback) {
                 console.log("Trying asset tag " + assetTag);
@@ -288,15 +295,17 @@ function doLocation(elem, tab) {
             elem.querySelectorAll("textarea#inputarea")[0].value = "";
             console.log("Done everything, cleared inputs");
         }
+        enableInput(elem);
     });
 }
 
 function doUser(elem, tab) {
     var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
-    var userObj = document.getElementById(tab).querySelectorAll("#textUser")[0];
+    var userObj = document.getElementById(tab).querySelectorAll("#selectList")[0];
     var userID = userObj.value;
     var assetID = "";
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
+        disableInput(elem);
         async.waterfall([
             function(callback) {
                 console.log("Trying asset tag " + assetTag);
@@ -377,7 +386,13 @@ function doUser(elem, tab) {
             elem.querySelectorAll("textarea#inputarea")[0].value = "";
             console.log("Done everything, cleared inputs");
         }
+        enableInput(elem);
     });
+}
+
+function enableInput(elem) {
+    elem.querySelectorAll("#selectList")[0].disabled = false;
+    elem.querySelectorAll("#btnSubmit")[0].disabled = false;
 }
 
 function getAssetID(assetTag, callback) {
@@ -400,10 +415,10 @@ function getAssetIDArray(inputList) {
     }
 }
 
-function getLocations() {
+function getLocations(tab) {
     httpGet(apiPrefix + "/locations", function(response) {
         var locations = response.rows;
-        var elemList = document.querySelectorAll('#textLocation');
+        var elemList = tab.querySelectorAll('#selectList');
 
         locations.sort(function(a, b){
             if(a.name < b.name) return -1;
@@ -423,10 +438,10 @@ function getLocations() {
     });
 }
 
-function getUsers() {
+function getUsers(tab) {
     httpGet(apiPrefix + "/users", function(response) {
         var users = response.rows;
-        var elemList = document.querySelectorAll('#textUser');
+        var elemList = tab.querySelectorAll('#selectList');
 
         users.sort();
         users.reverse();
@@ -504,9 +519,6 @@ function initScanner(callback) {
     initUser();
     initCheckIn();
 
-    getLocations();
-    getUsers();
-
     // Get the element with id="defaultOpen" and click on it
     document.getElementById("defaultOpen").click();
 }
@@ -543,6 +555,7 @@ function initLocation() {
     });
 
     elem.appendChild(submit);
+    getLocations(elem);
 }
 
 function initUser() {
@@ -561,6 +574,7 @@ function initUser() {
     });
 
     elem.appendChild(submit);
+    getUsers(elem);
 }
 
 function openTab(event, tabName) {

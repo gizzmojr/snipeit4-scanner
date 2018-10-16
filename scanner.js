@@ -527,6 +527,7 @@ function initCheckIn() {
     var tab = "Check-in";
     var elem = document.getElementById(tab);
     elem.appendChild(createInput());
+    elem.appendChild(createAudit());
 
     var submit = document.createElement("button");
     submit.id = "btnSubmit";

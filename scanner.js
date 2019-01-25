@@ -1,7 +1,7 @@
 'use strict';
 
 // Configuration options.
-var siteUrl = "http://snipeit.msec.local";
+var siteUrl = "http://snipeit";
 var apiPrefix = "/api/v1";
 var apiToken = "";
 var mainDomElement = "#scanner";

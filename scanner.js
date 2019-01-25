@@ -125,7 +125,7 @@ function createTabs() {
         var btn = document.createElement("button");
         btn.className = "tablinks";
         btn.innerHTML = tabsArray[tab];
-        btn.addEventListener("click", function() {
+        btn.addEventListener("click", function(e) {
             openTab(e, this.innerHTML);
         });
         if (tabsArray[tab] == "Checkout/Updating (Location)") {

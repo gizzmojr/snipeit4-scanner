@@ -126,7 +126,7 @@ function createTabs() {
         btn.className = "tablinks";
         btn.innerHTML = tabsArray[tab];
         btn.addEventListener("click", function() {
-            openTab(event, this.innerHTML);
+            openTab(e, this.innerHTML);
         });
         if (tabsArray[tab] == "Checkout/Updating (Location)") {
             btn.id = "defaultOpen";
@@ -578,7 +578,7 @@ function initUser() {
     getUsers(elem);
 }
 
-function openTab(event, tabName) {
+function openTab(e, tabName) {
     // Declare all variables
     var i, tabcontent, tablinks;
 
@@ -596,5 +596,5 @@ function openTab(event, tabName) {
 
     // Show the current tab, and add an "active" class to the button that opened the tab
     document.getElementById(tabName).style.display = "block";
-    event.currentTarget.className += " active";
+    e.currentTarget.className += " active";
 }

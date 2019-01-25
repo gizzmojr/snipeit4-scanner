@@ -182,6 +182,32 @@ function doCheckin(elem, tab) {
             getAssetID,
             checkInAsset,
             function(callback) {
+                if (document.getElementById(tab).querySelectorAll("#audit")[0].checked) {
+                    var today = new Date();
+                    var dd = today.getDate();
+                    var mm = today.getMonth()+1; //January is 0!
+                    var yyyy = today.getFullYear();
+                    var nextyear = yyyy + 1;
+
+                    if(dd<10) {
+                        dd = '0'+dd
+                    };
+
+                    if(mm<10) {
+                        mm = '0'+mm
+                    };
+
+                    var dataObj = {
+                        "asset_tag": assetTag,
+                        "note": "",
+                        "next_audit_date": nextyear + "-" + mm + "-" + dd
+                    };
+                    doAudit(dataObj, callback);
+                } else {
+                    callback(null)
+                }
+            },
+            function(callback) {
                 callback(null, "Done");
             }
         ], function(error, result) {

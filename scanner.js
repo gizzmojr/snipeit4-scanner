@@ -173,6 +173,7 @@ function doCheckin(elem, tab) {
     var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
         disableInput(elem);
+        elem.querySelectorAll("#btnSubmit")[0].disabled = true;
         async.waterfall([
             function(callback) {
                 console.log("Trying asset tag " + assetTag)
@@ -230,6 +231,7 @@ function doCheckin(elem, tab) {
             elem.querySelectorAll("textarea#inputarea")[0].value = "";
             console.log("Done everything, cleared inputs");
         }
+        elem.querySelectorAll("#btnSubmit")[0].disabled = false;
     });
 }
 

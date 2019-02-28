@@ -488,7 +488,7 @@ function getLocations(tab) {
 }
 
 function getUsers(tab) {
-    httpGet(apiPrefix + "/users", function(response) {
+    httpGet(apiPrefix + "/users?limit=200", function(response) {
         var users = response.rows;
         var elemList = tab.querySelectorAll('#selectList');
 

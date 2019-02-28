@@ -111,6 +111,24 @@ function createLocations() {
 
 }
 
+function createOpenUsers() {
+    var userPageDiv = document.createElement("div");
+    userPageDiv.className = "userPage";
+    var userPageLabel = document.createElement("p");
+    userPageLabel.innerText = "Open users page?";
+
+    var checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "userPage";
+    checkbox.checked = true;
+    checkbox.id = "userPage";
+
+    userPageDiv.appendChild(userPageLabel);
+    userPageDiv.appendChild(checkbox);
+
+    return userPageDiv;
+}
+
 function createTabs() {
     var tabsDiv = document.createElement("div");
     tabsDiv.className = "tab";
@@ -393,6 +411,9 @@ function doUser(elem, tab) {
             },
             function(callback) {
                 callback(null, "Done");
+                if (document.getElementById(tab).querySelectorAll("#userPage")[0].checked) {
+                    window.open(siteUrl + "/users/" + userID, '_blank');
+                };
             }
         ], function(error, result) {
             if (error === blankMsg) {
@@ -592,6 +613,7 @@ function initUser() {
     var elem = document.getElementById(tab);
     elem.appendChild(createInput());
     elem.appendChild(createAudit());
+    elem.appendChild(createOpenUsers());
     elem.appendChild(createUsers());
 
     var submit = document.createElement("button");

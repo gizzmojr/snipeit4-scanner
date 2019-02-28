@@ -190,7 +190,7 @@ function doAudit(dataObj, callback) {
 function doCheckin(elem, tab) {
     var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
-        disableInput(elem);
+        //disableInput(elem);
         elem.querySelectorAll("#btnSubmit")[0].disabled = true;
         async.waterfall([
             function(callback) {

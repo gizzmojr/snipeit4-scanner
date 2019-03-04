@@ -5,7 +5,7 @@ var siteUrl = "http://snipeit";
 var apiPrefix = "/api/v1";
 var apiToken = "";
 var mainDomElement = "#scanner";
-var tabsArray = ['Check-in', 'Checkout/Updating (User)', 'Checkout/Updating (Location)'];
+var tabsArray = ['Check-in', 'Checkout/Updating (User)', 'Checkout/Updating (Location)', 'Load List'];
 
 
 // "Private" global variables. Do not touch.
@@ -58,7 +58,7 @@ function checkOutAsset(assetID, dataObj, callback) {
 
 function createAudit() {
     var auditDiv = document.createElement("div");
-    auditDiv.className = "audit";
+    auditDiv.className = "checkbox";
     var auditLabel = document.createElement("p");
     auditLabel.innerText = "Update audit date? (1yr)";
 
@@ -250,6 +250,60 @@ function doCheckin(elem, tab) {
             console.log("Done everything, cleared inputs");
         }
         elem.querySelectorAll("#btnSubmit")[0].disabled = false;
+    });
+}
+
+function doLoadList(elem, tab) {
+    var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
+    async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
+        //disableInput(elem);
+        async.waterfall([
+            function(callback) {
+                console.log("Reading asset tag " + assetTag);
+                callback(null, assetTag);
+            },
+            checkBlank,
+            function(assetTag, callback) {
+                httpGet(apiPrefix + "/hardware/bytag/" + assetTag, function(response) {
+                    var itemCSV = assetTag;
+                    if (document.getElementById(tab).querySelectorAll("#category")[0].checked) { itemCSV += "," + response.category.name };
+                    if (document.getElementById(tab).querySelectorAll("#make")[0].checked) { itemCSV += "," + response.manufacturer.name };
+                    if (document.getElementById(tab).querySelectorAll("#model")[0].checked) { itemCSV += "," + response.model_number };
+                    itemCSV += "," + response.serial;
+                    var modal = document.getElementById(tab).querySelectorAll(".modal-content")[0];
+                    var textCSV = document.createElement("p");
+                    textCSV.innerText = itemCSV;
+                    modal.appendChild(textCSV);
+                    var modal2 = document.getElementById("csvmodal");
+                    modal2.style.display = "block";
+
+                    callback(null);
+                });
+            },
+            function(callback) {
+                callback(null, "Done");
+            }
+        ], function(error, result) {
+            if (error === blankMsg) {
+                // Just to break out of waterfall
+                console.log(error);
+                error = undefined;
+            } else if (error) {
+                console.log(error);
+            } else {
+                console.log(result);
+            };
+            assetArrayCallback(error, result);
+        });
+    }, function(error, result) {
+        if (error) {
+            console.log("Fatal - Stopped checking");
+            alert("Something went wrong\nCheck console for error");
+        } else {
+            elem.querySelectorAll("textarea#inputarea")[0].value = "";
+            console.log("Done everything, cleared inputs");
+        }
+        //enableInput(elem);
     });
 }
 
@@ -567,6 +621,7 @@ function initScanner(callback) {
     initLocation();
     initUser();
     initCheckIn();
+    initLoadList();
 
     // Get the element with id="defaultOpen" and click on it
     document.getElementById("defaultOpen").click();
@@ -587,6 +642,85 @@ function initCheckIn() {
     });
 
     elem.appendChild(submit);
+}
+
+function initLoadList() {
+    var tab = "Load List";
+    var elem = document.getElementById(tab);
+    elem.appendChild(createInput());
+
+    var extraFieldsDiv = document.createElement("div");
+    extraFieldsDiv.className = "outputfields";
+    var extraFieldsLabel = document.createElement("p");
+    extraFieldsLabel.innerText = "Add the following to the output?";
+    extraFieldsDiv.appendChild(extraFieldsLabel);
+
+    var addCategory = document.createElement("div");
+    addCategory.className = "checkbox";
+    var checkboxCategory = document.createElement("input");
+    checkboxCategory.type = "checkbox";
+    checkboxCategory.name = "category";
+    checkboxCategory.checked = true;
+    checkboxCategory.id = "category";
+    var labelCategory = document.createElement("p");
+    labelCategory.innerText = "Category";
+    addCategory.appendChild(checkboxCategory);
+    addCategory.appendChild(labelCategory);
+
+    var addMake = document.createElement("div");
+    addMake.className = "checkbox";
+    var checkboxMake = document.createElement("input");
+    checkboxMake.type = "checkbox";
+    checkboxMake.name = "make";
+    checkboxMake.checked = true;
+    checkboxMake.id = "make";
+    var labelMake = document.createElement("p");
+    labelMake.innerText = "Make";
+    addMake.appendChild(checkboxMake);
+    addMake.appendChild(labelMake);
+
+    var addModel = document.createElement("div");
+    addModel.className = "checkbox";
+    var checkboxModel = document.createElement("input");
+    checkboxModel.type = "checkbox";
+    checkboxModel.name = "model";
+    checkboxModel.checked = true;
+    checkboxModel.id = "model";
+    var labelModel = document.createElement("p");
+    labelModel.innerText = "Model";
+    addModel.appendChild(checkboxModel);
+    addModel.appendChild(labelModel);
+
+    var submit = document.createElement("button");
+    submit.id = "btnSubmit";
+    submit.innerText = "Submit";
+    submit.type = "button";
+    submit.addEventListener("click", function() {
+        doLoadList(elem, tab);
+    });
+
+    var divModal = document.createElement("div");
+    divModal.className = "modal";
+    divModal.id = "csvmodal";
+    var contentModal = document.createElement("div");
+    contentModal.className = "modal-content";
+    divModal.appendChild(contentModal);
+
+    var modalClose = document.createElement("span");
+    modalClose.className = "close";
+    modalClose.innerText = "Close";
+    modalClose.addEventListener("click", function() {
+        var modal = document.getElementById("csvmodal");
+        modal.style.display = "none";
+    });
+    contentModal.appendChild(modalClose);
+
+    elem.appendChild(extraFieldsDiv);
+    elem.appendChild(addCategory);
+    elem.appendChild(addMake);
+    elem.appendChild(addModel);
+    elem.appendChild(submit);
+    elem.appendChild(divModal);
 }
 
 function initLocation() {

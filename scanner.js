@@ -466,7 +466,7 @@ function doUser(elem, tab) {
             function(callback) {
                 callback(null, "Done");
                 if (document.getElementById(tab).querySelectorAll("#userPage")[0].checked) {
-                    window.open(siteUrl + "/users/" + userID, '_blank');
+                    window.open(siteUrl + "/users/" + userID + "/print", '_blank');
                 };
             }
         ], function(error, result) {

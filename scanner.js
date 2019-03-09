@@ -703,11 +703,14 @@ function initLoadList() {
     divModal.className = "modal";
     divModal.id = "csvmodal";
 
+    var header = document.createElement("h4");
+    header.innerText = "Save text a CSV file";
 
     var contentModal = document.createElement("div");
     contentModal.className = "modal-content";
     var contentText = document.createElement("p");
     contentText.id = "textmodal";
+    contentModal.appendChild(header);
     contentModal.appendChild(contentText);
     divModal.appendChild(contentModal);
 

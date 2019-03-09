@@ -270,12 +270,12 @@ function doLoadList(elem, tab) {
                     if (document.getElementById(tab).querySelectorAll("#make")[0].checked) { itemCSV += "," + response.manufacturer.name };
                     if (document.getElementById(tab).querySelectorAll("#model")[0].checked) { itemCSV += "," + response.model_number };
                     itemCSV += "," + response.serial;
-                    var modal = document.getElementById(tab).querySelectorAll(".modal-content")[0];
-                    var textCSV = document.createElement("p");
-                    textCSV.innerText = itemCSV;
-                    modal.appendChild(textCSV);
-                    var modal2 = document.getElementById("csvmodal");
-                    modal2.style.display = "block";
+                    var modalContent = document.getElementById(tab).querySelectorAll("#textmodal")[0];
+                    var text = document.createTextNode(itemCSV);
+                    modalContent.appendChild(text);
+                    modalContent.appendChild(document.createElement("br"));
+                    var modal = document.getElementById("csvmodal");
+                    modal.style.display = "block";
 
                     callback(null);
                 });
@@ -702,8 +702,13 @@ function initLoadList() {
     var divModal = document.createElement("div");
     divModal.className = "modal";
     divModal.id = "csvmodal";
+
+
     var contentModal = document.createElement("div");
     contentModal.className = "modal-content";
+    var contentText = document.createElement("p");
+    contentText.id = "textmodal";
+    contentModal.appendChild(contentText);
     divModal.appendChild(contentModal);
 
     var modalClose = document.createElement("span");

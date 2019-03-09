@@ -718,7 +718,11 @@ function initLoadList() {
     modalClose.className = "close";
     modalClose.innerText = "Close";
     modalClose.addEventListener("click", function() {
+        var el = document.getElementById(tab).querySelectorAll("#textmodal")[0];
         var modal = document.getElementById("csvmodal");
+        while( el.hasChildNodes() ){
+            el.removeChild(el.lastChild);
+        }
         modal.style.display = "none";
     });
     contentModal.appendChild(modalClose);

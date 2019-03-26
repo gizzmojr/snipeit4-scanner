@@ -704,6 +704,11 @@ function initLoadList() {
         doLoadList(elem, tab);
     });
 
+    var modal = document.getElementById("modalLoadList").querySelectorAll(".modal-header")[0];
+    var header = document.createElement("h4");
+    header.innerText = "Save text a CSV file";
+    modal.appendChild(header);    
+
     elem.appendChild(extraFieldsDiv);
     elem.appendChild(addCategory);
     elem.appendChild(addMake);
@@ -735,14 +740,15 @@ function createModal(name) {
     divModal.className = "modal";
     divModal.id = "modal" + name;
 
-    var header = document.createElement("h4");
-    header.innerText = "Save text a CSV file";
+    var modalHeader = document.createElement("div");
+    modalHeader.className = "modal-header";
 
     var contentModal = document.createElement("div");
     contentModal.className = "modal-content";
     var contentText = document.createElement("p");
     contentText.id = "textmodal";
-    contentModal.appendChild(header);
+
+    contentModal.appendChild(modalHeader);
     contentModal.appendChild(contentText);
     divModal.appendChild(contentModal);
 

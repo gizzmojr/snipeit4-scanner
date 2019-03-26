@@ -270,11 +270,11 @@ function doLoadList(elem, tab) {
                     if (document.getElementById(tab).querySelectorAll("#make")[0].checked) { itemCSV += "," + response.manufacturer.name };
                     if (document.getElementById(tab).querySelectorAll("#model")[0].checked) { itemCSV += "," + response.model_number };
                     itemCSV += "," + response.serial;
-                    var modalContent = document.getElementById(tab).querySelectorAll("#textmodal")[0];
+                    var modalContent = document.querySelector(mainDomElement).querySelectorAll("#textmodal")[0];
                     var text = document.createTextNode(itemCSV);
                     modalContent.appendChild(text);
                     modalContent.appendChild(document.createElement("br"));
-                    var modal = document.getElementById("csvmodal");
+                    var modal = document.getElementById("modalLoadList");
                     modal.style.display = "block";
 
                     callback(null);
@@ -617,7 +617,12 @@ function httpRequest(method, url, dataObj, successCallback, errorCallback) {
 }
 
 function initScanner(callback) {
+
+    var page = document.createElement("div");
+    page.id = mainDomElement;
+
     createTabs();
+    createModal("LoadList");
     initLocation();
     initUser();
     initCheckIn();
@@ -699,40 +704,11 @@ function initLoadList() {
         doLoadList(elem, tab);
     });
 
-    var divModal = document.createElement("div");
-    divModal.className = "modal";
-    divModal.id = "csvmodal";
-
-    var header = document.createElement("h4");
-    header.innerText = "Save text a CSV file";
-
-    var contentModal = document.createElement("div");
-    contentModal.className = "modal-content";
-    var contentText = document.createElement("p");
-    contentText.id = "textmodal";
-    contentModal.appendChild(header);
-    contentModal.appendChild(contentText);
-    divModal.appendChild(contentModal);
-
-    var modalClose = document.createElement("span");
-    modalClose.className = "close";
-    modalClose.innerText = "Close";
-    modalClose.addEventListener("click", function() {
-        var el = document.getElementById(tab).querySelectorAll("#textmodal")[0];
-        var modal = document.getElementById("csvmodal");
-        while( el.hasChildNodes() ){
-            el.removeChild(el.lastChild);
-        }
-        modal.style.display = "none";
-    });
-    contentModal.appendChild(modalClose);
-
     elem.appendChild(extraFieldsDiv);
     elem.appendChild(addCategory);
     elem.appendChild(addMake);
     elem.appendChild(addModel);
     elem.appendChild(submit);
-    elem.appendChild(divModal);
 }
 
 function initLocation() {
@@ -752,6 +728,38 @@ function initLocation() {
 
     elem.appendChild(submit);
     getLocations(elem);
+}
+
+function createModal(name) {
+    var divModal = document.createElement("div");
+    divModal.className = "modal";
+    divModal.id = "modal" + name;
+
+    var header = document.createElement("h4");
+    header.innerText = "Save text a CSV file";
+
+    var contentModal = document.createElement("div");
+    contentModal.className = "modal-content";
+    var contentText = document.createElement("p");
+    contentText.id = "textmodal";
+    contentModal.appendChild(header);
+    contentModal.appendChild(contentText);
+    divModal.appendChild(contentModal);
+
+    var modalClose = document.createElement("span");
+    modalClose.className = "close";
+    modalClose.innerText = "Close";
+    modalClose.addEventListener("click", function() {
+        var el = document.querySelector(mainDomElement).querySelectorAll("#textmodal")[0];
+        var modal = document.getElementById("modalLoadList");
+        while( el.hasChildNodes() ){
+            el.removeChild(el.lastChild);
+        }
+        modal.style.display = "none";
+    });
+    contentModal.appendChild(modalClose);
+
+    document.querySelector(mainDomElement).appendChild(divModal);
 }
 
 function initUser() {

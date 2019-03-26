@@ -141,6 +141,7 @@ function createModal(name, textHeader) {
     });
     contentModal.appendChild(modalClose);
     divModal.appendChild(contentModal);
+    divModal.style.display = "block";
 
     document.querySelector(mainDomElement).appendChild(divModal);
 }

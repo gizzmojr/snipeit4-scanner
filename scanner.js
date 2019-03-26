@@ -189,6 +189,15 @@ function createTabs() {
         document.querySelector(mainDomElement).appendChild(btnDiv);
     }
 
+    var btnAuth = document.createElement("button");
+    btnAuth.id = "btnAuth";
+    btnAuth.innerText = "Login";
+    btnAuth.type = "button";
+    btnAuth.addEventListener("click", function() {
+        createModal("API");
+    });
+    document.querySelector(mainDomElement).appendChild(btnAuth);
+
 }
 
 function createUsers() {

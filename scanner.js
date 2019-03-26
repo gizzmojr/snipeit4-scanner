@@ -111,6 +111,40 @@ function createLocations() {
 
 }
 
+function createModal(name, textHeader) {
+    var divModal = document.createElement("div");
+    divModal.className = "modal";
+    divModal.id = "modal" + name;
+
+    var modalHeader = document.createElement("div");
+    modalHeader.className = "modal-header";
+
+    var contentModal = document.createElement("div");
+    contentModal.className = "modal-content";
+    var contentText = document.createElement("p");
+    contentText.id = "textmodal";
+
+    var modalHeader = document.createElement("h4");
+    modalHeader.innerText = textHeader;
+
+    contentModal.appendChild(modalHeader);
+    contentModal.appendChild(contentText);
+
+    var modalClose = document.createElement("span");
+    modalClose.className = "close";
+    modalClose.innerText = "Close";
+    modalClose.addEventListener("click", function() {
+        var modal = document.querySelector(".modal");
+        if (modal !== null) {
+            modal.remove();
+        }
+    });
+    contentModal.appendChild(modalClose);
+    divModal.appendChild(contentModal);
+
+    document.querySelector(mainDomElement).appendChild(divModal);
+}
+
 function createOpenUsers() {
     var userPageDiv = document.createElement("div");
     userPageDiv.className = "userPage";
@@ -255,6 +289,7 @@ function doCheckin(elem, tab) {
 
 function doLoadList(elem, tab) {
     var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
+    createModal(tab, "Save text as a CSV file");
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
         //disableInput(elem);
         async.waterfall([
@@ -274,7 +309,7 @@ function doLoadList(elem, tab) {
                     var text = document.createTextNode(itemCSV);
                     modalContent.appendChild(text);
                     modalContent.appendChild(document.createElement("br"));
-                    var modal = document.getElementById("modalLoadList");
+                    var modal = document.getElementById("modal" + tab);
                     modal.style.display = "block";
 
                     callback(null);
@@ -622,7 +657,6 @@ function initScanner(callback) {
     page.id = mainDomElement;
 
     createTabs();
-    createModal("LoadList");
     initLocation();
     initUser();
     initCheckIn();
@@ -704,11 +738,6 @@ function initLoadList() {
         doLoadList(elem, tab);
     });
 
-    var modal = document.getElementById("modalLoadList").querySelectorAll(".modal-header")[0];
-    var header = document.createElement("h4");
-    header.innerText = "Save text a CSV file";
-    modal.appendChild(header);    
-
     elem.appendChild(extraFieldsDiv);
     elem.appendChild(addCategory);
     elem.appendChild(addMake);
@@ -733,39 +762,6 @@ function initLocation() {
 
     elem.appendChild(submit);
     getLocations(elem);
-}
-
-function createModal(name) {
-    var divModal = document.createElement("div");
-    divModal.className = "modal";
-    divModal.id = "modal" + name;
-
-    var modalHeader = document.createElement("div");
-    modalHeader.className = "modal-header";
-
-    var contentModal = document.createElement("div");
-    contentModal.className = "modal-content";
-    var contentText = document.createElement("p");
-    contentText.id = "textmodal";
-
-    contentModal.appendChild(modalHeader);
-    contentModal.appendChild(contentText);
-    divModal.appendChild(contentModal);
-
-    var modalClose = document.createElement("span");
-    modalClose.className = "close";
-    modalClose.innerText = "Close";
-    modalClose.addEventListener("click", function() {
-        var el = document.querySelector(mainDomElement).querySelectorAll("#textmodal")[0];
-        var modal = document.getElementById("modalLoadList");
-        while( el.hasChildNodes() ){
-            el.removeChild(el.lastChild);
-        }
-        modal.style.display = "none";
-    });
-    contentModal.appendChild(modalClose);
-
-    document.querySelector(mainDomElement).appendChild(divModal);
 }
 
 function initUser() {

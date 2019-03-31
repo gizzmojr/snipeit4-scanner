@@ -1,3 +1,4 @@
+/* jshint browser: true, devel: true */
 'use strict';
 
 // Configuration options.

@@ -578,7 +578,7 @@ function doLocation(elem, tab) {
                         break;
                     case 2:
                         callback(null);
-                };
+                }
             },
             function(callback) {
                 if (document.getElementById(tab).querySelectorAll("#audit")[0].checked) {
@@ -590,11 +590,11 @@ function doLocation(elem, tab) {
 
                     if(dd<10) {
                         dd = '0'+dd
-                    };
+                    }
 
                     if(mm<10) {
                         mm = '0'+mm
-                    };
+                    }
 
                     var dataObj = {
                         "asset_tag": assetTag,
@@ -670,7 +670,7 @@ function doUser(elem, tab) {
                         break;
                     case 2:
                         callback(null);
-                };
+                }
             },
             function(callback) {
                 if (document.getElementById(tab).querySelectorAll("#audit")[0].checked) {
@@ -682,11 +682,11 @@ function doUser(elem, tab) {
 
                     if(dd<10) {
                         dd = '0'+dd
-                    };
+                    }
 
                     if(mm<10) {
                         mm = '0'+mm
-                    };
+                    }
 
                     var dataObj = {
                         "asset_tag": assetTag,
@@ -702,7 +702,7 @@ function doUser(elem, tab) {
                 callback(null, "Done");
                 if (document.getElementById(tab).querySelectorAll("#userPage")[0].checked) {
                     window.open(siteUrl + "/users/" + userID + "/print", '_blank');
-                };
+                }
             }
         ], function(error, result) {
             if (error === blankMsg) {

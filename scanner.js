@@ -3,9 +3,7 @@
 
 // Configuration options.
 var siteUrl = "http://snipeit";
-var apiPrefix = "/api/v1";
 var apiToken = "";
-var mainDomElement = "#scanner";
 var tabsArray = ['Check-in', 'Checkout/Updating (User)', 'Checkout/Updating (Location)', 'Load List'];
 
 
@@ -359,25 +357,6 @@ function createInput() {
     return inputDiv;
 }
 
-function createLocations() {
-    var locationsDiv = document.createElement("div");
-    locationsDiv.className = "locations";
-
-    var locationLabel = document.createElement("p");
-    locationLabel.innerText = "Check-out to the following";
-
-    var locationList = document.createElement("select");
-    locationList.id = "selectList";
-    locationList.name = "location";
-    locationList.disabled = "true";
-
-    locationsDiv.appendChild(locationLabel);
-    locationsDiv.appendChild(locationList);
-
-    return locationsDiv;
-
-}
-
 function createModal(name, textHeader) {
     var divModal = document.createElement("div");
     divModal.className = "modal";
@@ -413,95 +392,24 @@ function createModal(name, textHeader) {
     document.querySelector(mainDomElement).appendChild(divModal);
 }
 
-function createOpenUsers() {
-    var userPageDiv = document.createElement("div");
-    userPageDiv.className = "userPage";
-    var userPageLabel = document.createElement("p");
-    userPageLabel.innerText = "Open users page?";
-
-    var checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.name = "userPage";
-    checkbox.checked = true;
-    checkbox.id = "userPage";
-
-    userPageDiv.appendChild(userPageLabel);
-    userPageDiv.appendChild(checkbox);
-
-    return userPageDiv;
-}
-
-function createTabs(callback) {
-    var tabsDiv = document.createElement("div");
-    tabsDiv.className = "tab";
-
-    document.querySelector(mainDomElement).appendChild(tabsDiv);
-
-    for (var tab in tabsArray) {
-        var btnDiv = document.createElement("div");
-        btnDiv.id = tabsArray[tab];
-        btnDiv.className = "tabcontent";
-
-        var btn = document.createElement("button");
-        btn.className = "tablinks";
-        btn.innerHTML = tabsArray[tab];
-        btn.addEventListener("click", function(e) {
-            openTab(e, this.innerHTML);
-        });
-        if (tabsArray[tab] == "Checkout/Updating (Location)") {
-            btn.id = "defaultOpen";
-        }
-
-        tabsDiv.appendChild(btn);
-        document.querySelector(mainDomElement).appendChild(btnDiv);
-    }
-
-    var btnAuth = document.createElement("button");
-    btnAuth.id = "btnAuth";
-    btnAuth.innerText = "Login";
-    btnAuth.type = "button";
-    btnAuth.addEventListener("click", function() {
-        createModal("", "Store API Key");
-        var modalContent = document.getElementById("textmodal");
-        var inputAPI = document.createElement("textarea");
-        inputAPI.id = "textAPI";
-        inputAPI.cols = "50";
-        inputAPI.rows = "10";
-
-        var btnSave = document.createElement("button");
-        btnSave.id = "btnSave";
-        btnSave.innerText = "Save";
-        btnSave.type = "button";
-        btnSave.addEventListener("click", function() {
-            saveAPIKey(document.getElementById("textAPI"));
-        });
-
-        modalContent.appendChild(inputAPI);
-        modalContent.appendChild(btnSave);
-    });
-    tabsDiv.appendChild(btnAuth);
-
-    callback();
-}
-
-function createUsers() {
-    var usersDiv = document.createElement("div");
-    usersDiv.className = "users";
-
-    var userLabel = document.createElement("p");
-    userLabel.innerText = "Check-out to the following";
-
-    var userList = document.createElement("select");
-    userList.id = "selectList";
-    userList.name = "user";
-    userList.disabled = "true";
-
-    usersDiv.appendChild(userLabel);
-    usersDiv.appendChild(userList);
-
-    return usersDiv;
-
-}
+// function createUsers() {
+//     var usersDiv = document.createElement("div");
+//     usersDiv.className = "users";
+//
+//     var userLabel = document.createElement("p");
+//     userLabel.innerText = "Check-out to the following";
+//
+//     var userList = document.createElement("select");
+//     userList.id = "selectList";
+//     userList.name = "user";
+//     userList.disabled = "true";
+//
+//     usersDiv.appendChild(userLabel);
+//     usersDiv.appendChild(userList);
+//
+//     return usersDiv;
+//
+// }
 
 function disableInput(elem) {
     elem.querySelectorAll("#selectList")[0].disabled = true;
@@ -847,54 +755,54 @@ function getAssetIDArray(inputList) {
     }
 }
 
-function getLocations(tab, callbackGetLocations) {
-    httpGet(apiPrefix + "/locations", function(response) {
-        var locations = response.rows;
-        var elemList = tab.querySelectorAll('#selectList');
+// function getLocations(tab, callbackGetLocations) {
+//     httpGet(apiPrefix + "/locations", function(response) {
+//         var locations = response.rows;
+//         var elemList = tab.querySelectorAll('#selectList');
+//
+//         locations.sort(function(a, b){
+//             if(a.name < b.name) return -1;
+//             if(a.name > b.name) return 1;
+//             return 0;
+//         });
+//
+//         elemList.forEach(function(elem) {
+//             elem.disabled = false;
+//             locations.forEach(function(loc) {
+//                 var option = document.createElement("option");
+//                 option.value = loc.id;
+//                 option.text = loc.name;
+//                 elem.appendChild(option);
+//             });
+//         });
+//     }, function(err) {
+//         if (err) {
+//             callbackGetLocations(err);
+//         }
+//     });
+// }
 
-        locations.sort(function(a, b){
-            if(a.name < b.name) return -1;
-            if(a.name > b.name) return 1;
-            return 0;
-        });
-
-        elemList.forEach(function(elem) {
-            elem.disabled = false;
-            locations.forEach(function(loc) {
-                var option = document.createElement("option");
-                option.value = loc.id;
-                option.text = loc.name;
-                elem.appendChild(option);
-            });
-        });
-    }, function(err) {
-        if (err) {
-            callbackGetLocations(err);
-        }
-    });
-}
-
-function getUsers(tab, callbackGetUsers) {
-    httpGet(apiPrefix + "/users?limit=200", function(response) {
-        var users = response.rows;
-        var elemList = tab.querySelectorAll('#selectList');
-
-        users.sort();
-        users.reverse();
-
-        elemList.forEach(function(elem) {
-            elem.disabled = false;
-            users.forEach(function(user) {
-                var option = document.createElement("option");
-                option.value = user.id;
-                option.text = user.name;
-                elem.appendChild(option);
-            });
-        });
-    }, function(err) {
-        callbackGetUsers(err);
-    });
-}
+// function getUsers(tab, callbackGetUsers) {
+//     httpGet(apiPrefix + "/users?limit=200", function(response) {
+//         var users = response.rows;
+//         var elemList = tab.querySelectorAll('#selectList');
+//
+//         users.sort();
+//         users.reverse();
+//
+//         elemList.forEach(function(elem) {
+//             elem.disabled = false;
+//             users.forEach(function(user) {
+//                 var option = document.createElement("option");
+//                 option.value = user.id;
+//                 option.text = user.name;
+//                 elem.appendChild(option);
+//             });
+//         });
+//     }, function(err) {
+//         callbackGetUsers(err);
+//     });
+// }
 
 function httpGet(url, successCallback, errorCallback) {
     httpRequest("GET", url, "", successCallback, errorCallback);
@@ -928,6 +836,7 @@ function httpRequest(method, url, dataObj, successCallback, errorCallback) {
             if (this.status == 200) {
                 return successCallback(obj);
             } else if (this.status == 401) {
+                alert(obj.error);
                 if (errorCallback !== undefined) {
                     errorCallback(obj.error);
                 }
@@ -953,41 +862,6 @@ function httpRequest(method, url, dataObj, successCallback, errorCallback) {
     xhr.send(JSON.stringify(payload));
 }
 
-function initScanner(callback) {
-
-    var page = document.createElement("div");
-    page.id = mainDomElement;
-
-    async.parallel([
-        initTabs,
-        initPage
-    ],
-    function(err, results) {
-        console.log("Done initScanner");
-    });
-
-//    if (apiToken == "") {
-//        loadAPIKey();
-//    }
-//
-//    async.series([
-//        createTabs,
-//        initLocation,
-//        initUser,
-//        initCheckIn,
-//        initLoadList
-//    ],
-//    function(err, result) {
-//        if (err) {
-//            console.log(err);
-//        }
-//    });
-//
-//    // Get the element with id="defaultOpen" and click on it
-//    document.getElementById("defaultOpen").click();
-}
-
-// ####################################################################
 function initCheckIn(callback) {
     var tab = "Check-in";
     var elem = document.getElementById(tab);
@@ -1069,50 +943,29 @@ function initLoadList(callback) {
     elem.appendChild(submit);
 }
 
-function initLocation(callbackInitLocation) {
-    var tab = "Checkout/Updating (Location)";
-    var elem = document.getElementById(tab);
-    elem.appendChild(createInput());
-    elem.appendChild(createAudit());
-    elem.appendChild(createLocations());
-
-    var submit = document.createElement("button");
-    submit.id = "btnSubmit";
-    submit.innerText = "Submit";
-    submit.type = "button";
-    submit.addEventListener("click", function() {
-        doLocation(elem, tab);
-    });
-
-    elem.appendChild(submit);
-    getLocations(elem, function(err) {
-        callbackInitLocation(err);
-    });
-}
-
-function initUser(callbackUser) {
-    var tab = "Checkout/Updating (User)";
-    var elem = document.getElementById(tab);
-    elem.appendChild(createInput());
-    elem.appendChild(createAudit());
-    elem.appendChild(createOpenUsers());
-    elem.appendChild(createUsers());
-
-    var submit = document.createElement("button");
-    submit.id = "btnSubmit";
-    submit.innerText = "Submit";
-    submit.type = "button";
-    submit.addEventListener("click", function() {
-        doUser(elem, tab);
-    });
-
-    elem.appendChild(submit);
-    getUsers(elem, function() {
-        callbackUser();
-    });
-}
-
-function loadAPIKey() {
+// function initUser(callbackUser) {
+//     var tab = "Checkout/Updating (User)";
+//     var elem = document.getElementById(tab);
+//     elem.appendChild(createInput());
+//     elem.appendChild(createAudit());
+//     elem.appendChild(createOpenUsers());
+//     elem.appendChild(createUsers());
+//
+//     var submit = document.createElement("button");
+//     submit.id = "btnSubmit";
+//     submit.innerText = "Submit";
+//     submit.type = "button";
+//     submit.addEventListener("click", function() {
+//         doUser(elem, tab);
+//     });
+//
+//     elem.appendChild(submit);
+//     getUsers(elem, function() {
+//         callbackUser();
+//     });
+// }
+//
+function loadAPIKey(callback) {
     apiToken = localStorage.getItem("API_Token");
     callback();
 }

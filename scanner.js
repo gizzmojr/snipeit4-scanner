@@ -144,7 +144,6 @@ function loadStaff(callback){
 
 function createLocationTab(callback) {
     var tab = "Checkout/Updating (Location)";
-
     var elem = document.createElement("div");
     elem.className = "tab_body";
     elem.id = tab;
@@ -196,7 +195,6 @@ function createLocationsList() {
 
 function createLocationTab(callback) {
     var tab = "Checkout/Updating (Location)";
-
     var elem = document.createElement("div");
     elem.className = "tab_body";
     elem.id = tab;
@@ -212,7 +210,6 @@ function createLocationTab(callback) {
 
 function createUserTab(callback) {
     var tab = "Checkout/Updating (User)";
-
     var elem = document.createElement("div");
     elem.className = "tab_body";
     elem.id = tab;
@@ -268,7 +265,6 @@ function createStaffList() {
 
     return usersDiv;
 }
-// ####################################################################
 
 function checkBlank(assetTag, callback) {
     if (assetTag == "") {
@@ -385,25 +381,6 @@ function createModal(name, textHeader) {
 
     document.querySelector(mainDomElement).appendChild(divModal);
 }
-
-// function createUsers() {
-//     var usersDiv = document.createElement("div");
-//     usersDiv.className = "users";
-//
-//     var userLabel = document.createElement("p");
-//     userLabel.innerText = "Check-out to the following";
-//
-//     var userList = document.createElement("select");
-//     userList.id = "selectList";
-//     userList.name = "user";
-//     userList.disabled = "true";
-//
-//     usersDiv.appendChild(userLabel);
-//     usersDiv.appendChild(userList);
-//
-//     return usersDiv;
-//
-// }
 
 function disableInput(elem) {
     elem.querySelectorAll("#selectList")[0].disabled = true;

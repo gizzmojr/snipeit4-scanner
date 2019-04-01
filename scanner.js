@@ -753,55 +753,6 @@ function getAssetIDArray(inputList) {
     }
 }
 
-// function getLocations(tab, callbackGetLocations) {
-//     httpGet(apiPrefix + "/locations", function(response) {
-//         var locations = response.rows;
-//         var elemList = tab.querySelectorAll('#selectList');
-//
-//         locations.sort(function(a, b){
-//             if(a.name < b.name) return -1;
-//             if(a.name > b.name) return 1;
-//             return 0;
-//         });
-//
-//         elemList.forEach(function(elem) {
-//             elem.disabled = false;
-//             locations.forEach(function(loc) {
-//                 var option = document.createElement("option");
-//                 option.value = loc.id;
-//                 option.text = loc.name;
-//                 elem.appendChild(option);
-//             });
-//         });
-//     }, function(err) {
-//         if (err) {
-//             callbackGetLocations(err);
-//         }
-//     });
-// }
-
-// function getUsers(tab, callbackGetUsers) {
-//     httpGet(apiPrefix + "/users?limit=200", function(response) {
-//         var users = response.rows;
-//         var elemList = tab.querySelectorAll('#selectList');
-//
-//         users.sort();
-//         users.reverse();
-//
-//         elemList.forEach(function(elem) {
-//             elem.disabled = false;
-//             users.forEach(function(user) {
-//                 var option = document.createElement("option");
-//                 option.value = user.id;
-//                 option.text = user.name;
-//                 elem.appendChild(option);
-//             });
-//         });
-//     }, function(err) {
-//         callbackGetUsers(err);
-//     });
-// }
-
 function httpGet(url, successCallback, errorCallback) {
     httpRequest("GET", url, "", successCallback, errorCallback);
 }
@@ -941,28 +892,6 @@ function initLoadList(callback) {
     elem.appendChild(submit);
 }
 
-// function initUser(callbackUser) {
-//     var tab = "Checkout/Updating (User)";
-//     var elem = document.getElementById(tab);
-//     elem.appendChild(createInput());
-//     elem.appendChild(createAudit());
-//     elem.appendChild(createOpenUsers());
-//     elem.appendChild(createUsers());
-//
-//     var submit = document.createElement("button");
-//     submit.id = "btnSubmit";
-//     submit.innerText = "Submit";
-//     submit.type = "button";
-//     submit.addEventListener("click", function() {
-//         doUser(elem, tab);
-//     });
-//
-//     elem.appendChild(submit);
-//     getUsers(elem, function() {
-//         callbackUser();
-//     });
-// }
-//
 function loadAPIKey(callback) {
     apiToken = localStorage.getItem("API_Token");
     callback();

@@ -11,8 +11,8 @@ var tabsArray = ['Check-in', 'Checkout/Updating (User)', 'Checkout/Updating (Loc
 var blankMsg = "\tEmpty value, skipping";
 var apiPrefix = "/api/v1";
 var mainDomElement = "#scanner";
-var locations;
-var staff;
+var locations = new Set();
+var staff = new Set();
 
 function initScanner(callback) {
 
@@ -118,7 +118,6 @@ function initPage(callback){
 }
 
 function loadLocations(callback) {
-    locations = new Set();
     httpGet(apiPrefix + "/locations?order=asc&sort=name", function(response) {
         var locationNames = response.rows;
         locationNames.forEach(function(location) {
@@ -133,7 +132,6 @@ function loadLocations(callback) {
 }
 
 function loadStaff(callback){
-    staff = new Set();
     httpGet(apiPrefix + "/users?limit=200&order=asc&sort=name", function(response) {
         var userNames = response.rows;
         userNames.forEach(function(user) {

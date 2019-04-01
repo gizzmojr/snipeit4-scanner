@@ -94,8 +94,6 @@ function createTabs(){
         tabs.appendChild(btnDiv);
     }
 
-    document.querySelector(mainDomElement).appendChild(tabs);
-
     return tabs;
 }
 
@@ -105,7 +103,6 @@ function initPage(callback){
         loadStaff,
         createLocationTab,
         createUserTab
-        // initUser,
         // initCheckIn,
         // initLoadList
     ],
@@ -270,7 +267,6 @@ function createStaffList() {
     usersDiv.appendChild(userList);
 
     return usersDiv;
-
 }
 // ####################################################################
 

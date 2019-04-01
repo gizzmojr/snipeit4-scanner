@@ -86,9 +86,9 @@ function createTabs(){
         var btn = document.createElement("button");
         btn.className = "tabbutton";
         btn.innerHTML = tabsArray[tab];
-        // btn.addEventListener("click", function(e) {
-        //     openTab(e, this.innerHTML);
-        // });
+        btn.addEventListener("click", function(e) {
+            openTab(e);
+        });
 
         btnDiv.appendChild(btn);
         tabs.appendChild(btnDiv);
@@ -970,25 +970,15 @@ function loadAPIKey(callback) {
     callback();
 }
 
-function openTab(e, tabName) {
-    // Declare all variables
-    var i, tabcontent, tablinks;
-
-    // Get all elements with class="tabcontent" and hide them
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
+function openTab(evt) {
+    // Get all elements with class="tab_body" and hide them
+    var allTabBody = document.getElementsByClassName("tab_body");
+    for (let i of allTabBody) {
+        i.style.display = "none";
     }
 
-    // Get all elements with class="tablinks" and remove the class "active"
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-
-    // Show the current tab, and add an "active" class to the button that opened the tab
-    document.getElementById(tabName).style.display = "block";
-    e.currentTarget.className += " active";
+    var en = allTabBody.namedItem(evt.currentTarget.innerText);
+    en.style.display = "block";
 }
 
 function saveAPIKey(key) {

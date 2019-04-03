@@ -102,9 +102,11 @@ function initPage(callback){
         loadLocations,
         loadStaff,
         createLocationTab,
-        createUserTab
         // initCheckIn,
         // initLoadList
+        createUserTab,
+        createCheckIn,
+        createLoadList
     ],
     function(err, result) {
         if (err) {
@@ -784,28 +786,27 @@ function httpRequest(method, url, dataObj, successCallback, errorCallback) {
     xhr.send(JSON.stringify(payload));
 }
 
-function initCheckIn(callback) {
+function createCheckIn(callback) {
     var tab = "Check-in";
-    var elem = document.getElementById(tab);
+    var elem = document.createElement("div");
+    elem.className = "tab_body";
+    elem.id = tab;
+    document.getElementById("tabDiv").appendChild(elem);
+
     elem.appendChild(createInput());
     elem.appendChild(createAudit());
+    elem.appendChild(createSubmit());
 
-    var submit = document.createElement("button");
-    submit.id = "btnSubmit";
-    submit.innerText = "Submit";
-    submit.type = "button";
-    submit.addEventListener("click", function() {
-        doCheckin(elem, tab);
-    });
-
-    elem.appendChild(submit);
-
-    callback(null);
+    callback();
 }
 
-function initLoadList(callback) {
+function createLoadList(callback) {
     var tab = "Load List";
-    var elem = document.getElementById(tab);
+    var elem = document.createElement("div");
+    elem.className = "tab_body";
+    elem.id = tab;
+    document.getElementById("tabDiv").appendChild(elem);
+
     elem.appendChild(createInput());
 
     var extraFieldsDiv = document.createElement("div");
@@ -863,6 +864,8 @@ function initLoadList(callback) {
     elem.appendChild(addMake);
     elem.appendChild(addModel);
     elem.appendChild(submit);
+
+    callback();
 }
 
 function loadAPIKey(callback) {

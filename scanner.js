@@ -408,7 +408,7 @@ function doTab(tab) {
             doLocation(tab);
             break;
         case tabsArray[3]:
-            doLoadList(tab);
+            doLoadList(3);
             break;
     }
 }
@@ -480,9 +480,10 @@ function doCheckin(tab) {
     });
 }
 
-function doLoadList(elem, tab) {
-    var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
-    createModal(tab, "Save text as a CSV file");
+function doLoadList(tab) {
+    var tabElements = document.getElementById("tabDiv").querySelectorAll("#" + tabsArray[3] + ".tab_body")[0];
+    var assetArray = getAssetIDArray(tabElements.querySelectorAll("textarea#inputarea")[0].value);
+    createModal(tabsArray[3], "Save text as a CSV file");
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
         //disableInput(elem);
         async.waterfall([
@@ -494,15 +495,15 @@ function doLoadList(elem, tab) {
             function(assetTag, callback) {
                 httpGet(apiPrefix + "/hardware/bytag/" + assetTag, function(response) {
                     var itemCSV = assetTag;
-                    if (document.getElementById(tab).querySelectorAll("#category")[0].checked) { itemCSV += "," + response.category.name };
-                    if (document.getElementById(tab).querySelectorAll("#make")[0].checked) { itemCSV += "," + response.manufacturer.name };
-                    if (document.getElementById(tab).querySelectorAll("#model")[0].checked) { itemCSV += "," + response.model_number };
+                    if (tabElements.querySelectorAll("#category")[0].checked) { itemCSV += "," + response.category.name };
+                    if (tabElements.querySelectorAll("#make")[0].checked) { itemCSV += "," + response.manufacturer.name };
+                    if (tabElements.querySelectorAll("#model")[0].checked) { itemCSV += "," + response.model_number };
                     itemCSV += "," + response.serial;
                     var modalContent = document.querySelector(mainDomElement).querySelectorAll("#textmodal")[0];
                     var text = document.createTextNode(itemCSV);
                     modalContent.appendChild(text);
                     modalContent.appendChild(document.createElement("br"));
-                    var modal = document.getElementById("modal" + tab);
+                    var modal = document.getElementById("modal" + tabsArray[3]);
                     modal.style.display = "block";
 
                     callback(null);
@@ -528,20 +529,21 @@ function doLoadList(elem, tab) {
             console.log("Fatal - Stopped checking");
             alert("Something went wrong\nCheck console for error");
         } else {
-            elem.querySelectorAll("textarea#inputarea")[0].value = "";
+            tabElements.querySelectorAll("textarea#inputarea")[0].value = "";
             console.log("Done everything, cleared inputs");
         }
         //enableInput(elem);
     });
 }
 
-function doLocation(elem, tab) {
-    var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
-    var locationObj = document.getElementById(tab).querySelectorAll("#selectList")[0];
+function doLocation(tab) {
+    var tabElements = document.getElementById("tabDiv").querySelectorAll("#" + tabsArray[2] + ".tab_body")[0];
+    var assetArray = getAssetIDArray(tabElements.querySelectorAll("textarea#inputarea")[0].value);
+    var locationObj = tabElements.querySelectorAll("#selectList")[0];
     var locationID = locationObj.value;
     var assetID = "";
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
-        disableInput(elem);
+        disableInput(tabElements);
         async.waterfall([
             function(callback) {
                 console.log("Trying asset tag " + assetTag);
@@ -574,7 +576,7 @@ function doLocation(elem, tab) {
                 }
             },
             function(callback) {
-                if (document.getElementById(tab).querySelectorAll("#audit")[0].checked) {
+                if (tabElements.querySelectorAll("#audit")[0].checked) {
                     var today = new Date();
                     var dd = today.getDate();
                     var mm = today.getMonth()+1; //January is 0!
@@ -620,20 +622,21 @@ function doLocation(elem, tab) {
             console.log("Fatal - Stopped checking");
             alert("Something went wrong\nCheck console for error");
         } else {
-            elem.querySelectorAll("textarea#inputarea")[0].value = "";
+            tabElements.querySelectorAll("textarea#inputarea")[0].value = "";
             console.log("Done everything, cleared inputs");
         }
-        enableInput(elem);
+        enableInput(tabElements);
     });
 }
 
-function doUser(elem, tab) {
-    var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
+function doUser(tab) {
+    var tabElements = document.getElementById("tabDiv").querySelectorAll("#" + tabsArray[1] + ".tab_body")[0];
+    var assetArray = getAssetIDArray(tabElements.querySelectorAll("textarea#inputarea")[0].value);
     var userObj = document.getElementById(tab).querySelectorAll("#selectList")[0];
     var userID = userObj.value;
     var assetID = "";
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
-        disableInput(elem);
+        disableInput(tabElements);
         async.waterfall([
             function(callback) {
                 console.log("Trying asset tag " + assetTag);
@@ -714,10 +717,10 @@ function doUser(elem, tab) {
             console.log("Fatal - Stopped checking");
             alert("Something went wrong\nCheck console for error");
         } else {
-            elem.querySelectorAll("textarea#inputarea")[0].value = "";
+            tabElements.querySelectorAll("textarea#inputarea")[0].value = "";
             console.log("Done everything, cleared inputs");
         }
-        enableInput(elem);
+        enableInput(tabElements);
     });
 }
 
@@ -813,13 +816,13 @@ function createCheckIn(callback) {
 
     elem.appendChild(createInput());
     elem.appendChild(createAudit());
-    elem.appendChild(createSubmit());
+    elem.appendChild(createSubmit(tab));
 
     callback();
 }
 
 function createLoadList(callback) {
-    var tab = "Load List";
+    var tab = tabsArray[3];
     var elem = document.createElement("div");
     elem.className = "tab_body";
     elem.id = tab;

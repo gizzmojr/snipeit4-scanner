@@ -398,6 +398,23 @@ function doAudit(dataObj, callback) {
 
 function doCheckin(elem, tab) {
     var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
+function doTab(tab) {
+    switch (tab) {
+        case tabsArray[0]:
+            doCheckin(tab);
+            break;
+        case tabsArray[1]:
+            doUser(tab);
+            break;
+        case tabsArray[2]:
+            doLocation(tab);
+            break;
+        case tabsArray[3]:
+            doLoadList(tab);
+            break;
+    }
+}
+
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
         //disableInput(elem);
         elem.querySelectorAll("#btnSubmit")[0].disabled = true;

@@ -102,7 +102,6 @@ function initPage(callback){
         loadLocations,
         loadStaff,
         createLocationTab,
-        // initCheckIn,
         // initLoadList
         createUserTab,
         createCheckIn,
@@ -223,7 +222,7 @@ function createUserTab(callback) {
     elem.appendChild(createAudit());
     elem.appendChild(createOpenUsers());
     elem.appendChild(createStaffList());
-    elem.appendChild(createSubmit());
+    elem.appendChild(createSubmit(tab));
 
     callback();
 }
@@ -633,13 +632,21 @@ function doLocation(tab) {
 }
 
 function doUser(tab) {
-    var tabElements = document.getElementById("tabDiv").querySelectorAll("#" + tabsArray[1] + ".tab_body")[0];
-    var assetArray = getAssetIDArray(tabElements.querySelectorAll("textarea#inputarea")[0].value);
-    var userObj = document.getElementById(tab).querySelectorAll("#selectList")[0];
+    var currentTabElements;
+    var elems = document.getElementById("tabDiv").querySelectorAll(".tab_body");
+    for (var i in elems) {
+        if (elems[i].style.display != "none") { // Find the only active one
+            currentTabElements = elems[i];
+            break;
+        }
+    }
+
+    var assetArray = getAssetIDArray(currentTabElements.querySelectorAll("textarea#inputarea")[0].value);
+    var userObj = currentTabElements.querySelectorAll("select.selectList")[0];
     var userID = userObj.value;
     var assetID = "";
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
-        disableInput(tabElements);
+        disableInput(currentTabElements);
         async.waterfall([
             function(callback) {
                 console.log("Trying asset tag " + assetTag);
@@ -672,7 +679,7 @@ function doUser(tab) {
                 }
             },
             function(callback) {
-                if (document.getElementById(tab).querySelectorAll("#audit")[0].checked) {
+                if (currentTabElements.querySelectorAll("#audit")[0].checked) {
                     var today = new Date();
                     var dd = today.getDate();
                     var mm = today.getMonth()+1; //January is 0!
@@ -698,8 +705,8 @@ function doUser(tab) {
                 }
             },
             function(callback) {
-                callback(null, "Done");
-                if (document.getElementById(tab).querySelectorAll("#userPage")[0].checked) {
+                callback(null, "Done " + tabsArray[1]);
+                if (currentTabElements.querySelectorAll("#userPage")[0].checked) {
                     window.open(siteUrl + "/users/" + userID + "/print", '_blank');
                 }
             }
@@ -720,10 +727,10 @@ function doUser(tab) {
             console.log("Fatal - Stopped checking");
             alert("Something went wrong\nCheck console for error");
         } else {
-            tabElements.querySelectorAll("textarea#inputarea")[0].value = "";
+            currentTabElements.querySelectorAll("textarea#inputarea")[0].value = "";
             console.log("Done everything, cleared inputs");
         }
-        enableInput(tabElements);
+        enableInput(currentTabElements);
     });
 }
 

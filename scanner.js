@@ -520,7 +520,7 @@ function doLoadList(elem, tab) {
                 console.log(error);
             } else {
                 console.log(result);
-            };
+            }
             assetArrayCallback(error, result);
         });
     }, function(error, result) {
@@ -582,11 +582,11 @@ function doLocation(elem, tab) {
                     var nextyear = yyyy + 1;
 
                     if(dd<10) {
-                        dd = '0'+dd
+                        dd = '0'+dd;
                     }
 
                     if(mm<10) {
-                        mm = '0'+mm
+                        mm = '0'+mm;
                     }
 
                     var dataObj = {
@@ -597,7 +597,7 @@ function doLocation(elem, tab) {
                     };
                     doAudit(dataObj, callback);
                 } else {
-                    callback(null)
+                    callback(null);
                 }
             },
             function(callback) {
@@ -612,7 +612,7 @@ function doLocation(elem, tab) {
                 console.log(error);
             } else {
                 console.log(result);
-            };
+            }
             assetArrayCallback(error, result);
         });
     }, function(error, result) {
@@ -674,11 +674,11 @@ function doUser(elem, tab) {
                     var nextyear = yyyy + 1;
 
                     if(dd<10) {
-                        dd = '0'+dd
+                        dd = '0'+dd;
                     }
 
                     if(mm<10) {
-                        mm = '0'+mm
+                        mm = '0'+mm;
                     }
 
                     var dataObj = {
@@ -688,7 +688,7 @@ function doUser(elem, tab) {
                     };
                     doAudit(dataObj, callback);
                 } else {
-                    callback(null)
+                    callback(null);
                 }
             },
             function(callback) {
@@ -706,7 +706,7 @@ function doUser(elem, tab) {
                 console.log(error);
             } else {
                 console.log(result);
-            };
+            }
             assetArrayCallback(error, result);
         });
     }, function(error, result) {

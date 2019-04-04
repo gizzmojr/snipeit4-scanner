@@ -388,8 +388,8 @@ function createModal(name, textHeader) {
 }
 
 function disableInput(elem) {
-    elem.querySelectorAll("#selectList")[0].disabled = true;
-    elem.querySelectorAll("#btnSubmit")[0].disabled = true;
+    elem.querySelectorAll("select.selectList")[0].disabled = true;
+    elem.querySelectorAll("button#btnSubmit")[0].disabled = true;
 }
 
 function doAudit(dataObj, callback) {
@@ -728,8 +728,8 @@ function doUser(tab) {
 }
 
 function enableInput(elem) {
-    elem.querySelectorAll("#selectList")[0].disabled = false;
-    elem.querySelectorAll("#btnSubmit")[0].disabled = false;
+    elem.querySelectorAll("select.selectList")[0].disabled = false;
+    elem.querySelectorAll("button#btnSubmit")[0].disabled = false;
 }
 
 function getAssetID(assetTag, callback) {

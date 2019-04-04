@@ -134,11 +134,13 @@ function loadStaff(callback){
     httpGet(apiPrefix + "/users?limit=200&order=asc&sort=name", function(response) {
         var userNames = response.rows;
         userNames.forEach(function(user) {
-            var usersName = user.name;
-            if (usersName === "") {
+            var option = new Set();
+            option.value = user.id;
+            option.text = user.name;
+            if (option === "") {
                 return;
             }
-            staff.add(usersName);
+            staff.add(option);
         });
         callback();
     });
@@ -255,9 +257,10 @@ function createStaffList() {
     userList.className = "selectList";
     userList.disabled = true;
 
-    staff.forEach(function(elem) {
+    staff.forEach(function(set) {
         var option = document.createElement("option");
-        option.text = elem;
+        option.text = set.text;
+        option.value = set.value;
         userList.appendChild(option);
     });
     userList.disabled = false;

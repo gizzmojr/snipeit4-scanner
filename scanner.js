@@ -145,7 +145,7 @@ function loadStaff(callback){
 }
 
 function createLocationTab(callback) {
-    var tab = "Checkout/Updating (Location)";
+    var tab = tabsArray[3];
     var elem = document.createElement("div");
     elem.className = "tab_body";
     elem.id = tab;
@@ -196,7 +196,7 @@ function createLocationsList() {
 }
 
 function createLocationTab(callback) {
-    var tab = "Checkout/Updating (Location)";
+    var tab = tabsArray[2];
     var elem = document.createElement("div");
     elem.className = "tab_body";
     elem.id = tab;
@@ -211,7 +211,7 @@ function createLocationTab(callback) {
 }
 
 function createUserTab(callback) {
-    var tab = "Checkout/Updating (User)";
+    var tab = tabsArray[1];
     var elem = document.createElement("div");
     elem.className = "tab_body";
     elem.id = tab;

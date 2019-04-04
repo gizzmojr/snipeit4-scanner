@@ -811,7 +811,7 @@ function httpRequest(method, url, dataObj, successCallback, errorCallback) {
 }
 
 function createCheckIn(callback) {
-    var tab = "Check-in";
+    var tab = tabsArray[1];
     var elem = document.createElement("div");
     elem.className = "tab_body";
     elem.id = tab;

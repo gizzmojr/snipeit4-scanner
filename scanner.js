@@ -292,7 +292,7 @@ function checkIfDeployed(assetID, assignedID, callback) {
             } else {
                 console.log("\tAlready assigned, updating");
                 callback(null, 1);
-            };
+            }
         } else {
             callback(null, 0);
         }
@@ -467,7 +467,7 @@ function doCheckin(tab) {
                 console.log(error);
             } else {
                 console.log(result);
-            };
+            }
             assetArrayCallback(error, result);
         });
     }, function(error, result) {
@@ -497,9 +497,9 @@ function doLoadList(tab) {
             function(assetTag, callback) {
                 httpGet(apiPrefix + "/hardware/bytag/" + assetTag, function(response) {
                     var itemCSV = assetTag;
-                    if (tabElements.querySelectorAll("#category")[0].checked) { itemCSV += "," + response.category.name };
-                    if (tabElements.querySelectorAll("#make")[0].checked) { itemCSV += "," + response.manufacturer.name };
-                    if (tabElements.querySelectorAll("#model")[0].checked) { itemCSV += "," + response.model_number };
+                    if (tabElements.querySelectorAll("#category")[0].checked) { itemCSV += "," + response.category.name; }
+                    if (tabElements.querySelectorAll("#make")[0].checked) { itemCSV += "," + response.manufacturer.name; }
+                    if (tabElements.querySelectorAll("#model")[0].checked) { itemCSV += "," + response.model_number; }
                     itemCSV += "," + response.serial;
                     var modalContent = document.querySelector(mainDomElement).querySelectorAll("#textmodal")[0];
                     var text = document.createTextNode(itemCSV);

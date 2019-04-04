@@ -364,7 +364,7 @@ function createModal(name, textHeader) {
     var contentText = document.createElement("p");
     contentText.id = "textmodal";
 
-    var modalHeader = document.createElement("h4");
+    modalHeader = document.createElement("h4");
     modalHeader.innerText = textHeader;
 
     contentModal.appendChild(modalHeader);

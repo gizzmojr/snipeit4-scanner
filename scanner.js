@@ -159,14 +159,14 @@ function createLocationTab(callback) {
     callback();
 }
 
-function createSubmit() {
+function createSubmit(tab) {
     var submit = document.createElement("button");
     submit.id = "btnSubmit";
     submit.innerText = "Submit";
     submit.type = "button";
-    // submit.addEventListener("click", function() {
-    //     doLocation(tabBody, tab); // doTAB or something
-    // });
+    submit.addEventListener("click", function() {
+        doTab(tab);
+    });
 
     return submit;
 }

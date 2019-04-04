@@ -276,7 +276,7 @@ function checkBlank(assetTag, callback) {
         callback(blankMsg);
     } else {
         callback(null, assetTag);
-    };
+    }
 }
 
 function checkIfDeployed(assetID, assignedID, callback) {

@@ -396,8 +396,6 @@ function doAudit(dataObj, callback) {
     });
 }
 
-function doCheckin(elem, tab) {
-    var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
 function doTab(tab) {
     switch (tab) {
         case tabsArray[0]:
@@ -415,19 +413,22 @@ function doTab(tab) {
     }
 }
 
+function doCheckin(tab) {
+    var tabElements = document.getElementById("tabDiv").querySelectorAll("#" + tabsArray[0] + ".tab_body")[0];
+    var assetArray = getAssetIDArray(tabElements.querySelectorAll("textarea#inputarea")[0].value);
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
         //disableInput(elem);
-        elem.querySelectorAll("#btnSubmit")[0].disabled = true;
+        tabElements.querySelectorAll("#btnSubmit")[0].disabled = true;
         async.waterfall([
             function(callback) {
-                console.log("Trying asset tag " + assetTag)
+                console.log("Trying asset tag " + assetTag);
                 callback(null, assetTag);
             },
             checkBlank,
             getAssetID,
             checkInAsset,
             function(callback) {
-                if (document.getElementById(tab).querySelectorAll("#audit")[0].checked) {
+                if (tabElements.querySelectorAll("#audit")[0].checked) {
                     var today = new Date();
                     var dd = today.getDate();
                     var mm = today.getMonth()+1; //January is 0!
@@ -435,12 +436,12 @@ function doTab(tab) {
                     var nextyear = yyyy + 1;
 
                     if(dd<10) {
-                        dd = '0'+dd
-                    };
+                        dd = '0'+dd;
+                    }
 
                     if(mm<10) {
-                        mm = '0'+mm
-                    };
+                        mm = '0'+mm;
+                    }
 
                     var dataObj = {
                         "asset_tag": assetTag,
@@ -449,7 +450,7 @@ function doTab(tab) {
                     };
                     doAudit(dataObj, callback);
                 } else {
-                    callback(null)
+                    callback(null);
                 }
             },
             function(callback) {
@@ -472,10 +473,10 @@ function doTab(tab) {
             console.log("Fatal - Stopped checking");
             alert("Something went wrong\nCheck console for error");
         } else {
-            elem.querySelectorAll("textarea#inputarea")[0].value = "";
+            tabElements.querySelectorAll("textarea#inputarea")[0].value = "";
             console.log("Done everything, cleared inputs");
         }
-        elem.querySelectorAll("#btnSubmit")[0].disabled = false;
+        tabElements.querySelectorAll("#btnSubmit")[0].disabled = false;
     });
 }
 

@@ -118,11 +118,13 @@ function loadLocations(callback) {
     httpGet(apiPrefix + "/locations?order=asc&sort=name", function(response) {
         var locationNames = response.rows;
         locationNames.forEach(function(location) {
-            var locationName = location.name;
-            if (locationName === "") {
+            var option = new Set();
+            option.value = location.id;
+            option.text = location.name;
+            if (option === "") {
                 return;
             }
-            locations.add(locationName);
+            locations.add(option);
         });
         callback();
     });
@@ -182,9 +184,10 @@ function createLocationsList() {
     locationList.className = "selectList";
     locationList.disabled = true;
 
-    locations.forEach(function(elem) {
+    locations.forEach(function(set) {
         var option = document.createElement("option");
-        option.text = elem;
+        option.text = set.text;
+        option.value = set.value;
         locationList.appendChild(option);
     });
     locationList.disabled = false;

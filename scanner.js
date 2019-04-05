@@ -304,14 +304,22 @@ function checkIfDeployed(assetID, assignedID, callback) {
 function checkInAsset(assetID, callback) {
     var dataObj = {
     };
-    httpPost(apiPrefix + "/hardware/" + assetID + "/checkin", dataObj, function() {
+    httpPost(apiPrefix + "/hardware/" + assetID + "/checkin", dataObj, function(response) {
+        if (response.status == "error") {
+            callback(response.messages);
+            return;
+        }
         console.log("\tChecked in " + assetID);
         callback(null);
     });
 }
 
 function checkOutAsset(assetID, dataObj, callback) {
-    httpPost(apiPrefix + "/hardware/" + assetID + "/checkout", dataObj, function() {
+    httpPost(apiPrefix + "/hardware/" + assetID + "/checkout", dataObj, function(response) {
+        if (response.status == "error") {
+            callback(response.messages);
+            return;
+        }
         console.log("\tChecked out " + assetID);
         callback(null);
     });

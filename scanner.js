@@ -102,7 +102,6 @@ function initPage(callback){
         loadLocations,
         loadStaff,
         createLocationTab,
-        // initLoadList
         createUserTab,
         createCheckIn,
         createLoadList
@@ -206,7 +205,7 @@ function createLocationTab(callback) {
     elem.appendChild(createInput());
     elem.appendChild(createAudit());
     elem.appendChild(createLocationsList());
-    elem.appendChild(createSubmit());
+    elem.appendChild(createSubmit(tab));
 
     callback();
 }
@@ -410,7 +409,7 @@ function doTab(tab) {
             doLocation(tab);
             break;
         case tabsArray[3]:
-            doLoadList(3);
+            doLoadList(tab);
             break;
     }
 }
@@ -539,13 +538,21 @@ function doLoadList(tab) {
 }
 
 function doLocation(tab) {
-    var tabElements = document.getElementById("tabDiv").querySelectorAll("#" + tabsArray[2] + ".tab_body")[0];
-    var assetArray = getAssetIDArray(tabElements.querySelectorAll("textarea#inputarea")[0].value);
-    var locationObj = tabElements.querySelectorAll("#selectList")[0];
+    var currentTabElements;
+    var elems = document.getElementById("tabDiv").querySelectorAll(".tab_body");
+    for (var i in elems) {
+        if (elems[i].style.display != "none") { // Find the only active one
+            currentTabElements = elems[i];
+            break;
+        }
+    }
+
+    var assetArray = getAssetIDArray(currentTabElements.querySelectorAll("textarea#inputarea")[0].value);
+    var locationObj = currentTabElements.querySelectorAll("select.selectList")[0];
     var locationID = locationObj.value;
     var assetID = "";
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
-        disableInput(tabElements);
+        disableInput(currentTabElements);
         async.waterfall([
             function(callback) {
                 console.log("Trying asset tag " + assetTag);
@@ -578,7 +585,7 @@ function doLocation(tab) {
                 }
             },
             function(callback) {
-                if (tabElements.querySelectorAll("#audit")[0].checked) {
+                if (currentTabElements.querySelectorAll("#audit")[0].checked) {
                     var today = new Date();
                     var dd = today.getDate();
                     var mm = today.getMonth()+1; //January is 0!
@@ -624,10 +631,10 @@ function doLocation(tab) {
             console.log("Fatal - Stopped checking");
             alert("Something went wrong\nCheck console for error");
         } else {
-            tabElements.querySelectorAll("textarea#inputarea")[0].value = "";
+            currentTabElements.querySelectorAll("textarea#inputarea")[0].value = "";
             console.log("Done everything, cleared inputs");
         }
-        enableInput(tabElements);
+        enableInput(currentTabElements);
     });
 }
 

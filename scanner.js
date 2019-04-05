@@ -1,22 +1,283 @@
+/* jshint browser: true, devel: true, esversion: 6 */
 'use strict';
 
 // Configuration options.
 var siteUrl = "http://snipeit";
-var apiPrefix = "/api/v1";
 var apiToken = "";
-var mainDomElement = "#scanner";
 var tabsArray = ['Check-in', 'Checkout/Updating (User)', 'Checkout/Updating (Location)', 'Load List'];
 
 
 // "Private" global variables. Do not touch.
 var blankMsg = "\tEmpty value, skipping";
+var apiPrefix = "/api/v1";
+var mainDomElement = "#scanner";
+var locations = new Set();
+var staff = new Set();
+
+function initScanner(callback) {
+
+    var page = document.createElement("div");
+    page.id = mainDomElement;
+
+    async.parallel([
+        loadAPIKey,
+        initNav,
+        initTabBody,
+        initPage
+    ],
+    function(err, results) {
+        console.log("Initialized Page");
+    });
+
+//
+//    // Get the element with id="defaultOpen" and click on it
+//    document.getElementById("defaultOpen").click();
+}
+
+function initTabBody(callback) {
+    var tabDiv = document.createElement("div");
+    tabDiv.id = "tabDiv";
+    document.querySelector(mainDomElement).appendChild(tabDiv);
+
+    callback();
+}
+
+function initNav(callback) {
+    document.querySelector(mainDomElement).appendChild(createTabs());
+
+    // TODO Handle the login button better
+    var btnAuth = document.createElement("button");
+    btnAuth.id = "btnAuth";
+    btnAuth.innerText = "Login";
+    btnAuth.type = "button";
+    btnAuth.addEventListener("click", function() {
+        createModal("", "Store API Key");
+        var modalContent = document.getElementById("textmodal");
+        var inputAPI = document.createElement("textarea");
+        inputAPI.id = "textAPI";
+        inputAPI.cols = "50";
+        inputAPI.rows = "10";
+
+        var btnSave = document.createElement("button");
+        btnSave.id = "btnSave";
+        btnSave.innerText = "Save";
+        btnSave.type = "button";
+        btnSave.addEventListener("click", function() {
+            saveAPIKey(document.getElementById("textAPI"));
+        });
+
+        modalContent.appendChild(inputAPI);
+        modalContent.appendChild(btnSave);
+    });
+    document.querySelector("#nav").appendChild(btnAuth);
+
+    callback();
+}
+
+function createTabs(){
+    var tabs = document.createElement("div");
+    tabs.id = "nav";
+
+    for (var tab in tabsArray) {
+        var btnDiv = document.createElement("div");
+        btnDiv.id = tabsArray[tab];
+        btnDiv.className = "tabcontent";
+
+        var btn = document.createElement("button");
+        btn.className = "tabbutton";
+        btn.innerHTML = tabsArray[tab];
+        btn.addEventListener("click", function(e) {
+            openTab(e);
+        });
+
+        btnDiv.appendChild(btn);
+        tabs.appendChild(btnDiv);
+    }
+
+    return tabs;
+}
+
+function initPage(callback){
+    async.series([
+        loadLocations,
+        loadStaff,
+        createLocationTab,
+        createUserTab,
+        createCheckIn,
+        createLoadList
+    ],
+    function(err, result) {
+        if (err) {
+            console.log(err);
+        }
+    });
+    callback();
+}
+
+function loadLocations(callback) {
+    httpGet(apiPrefix + "/locations?order=asc&sort=name", function(response) {
+        var locationNames = response.rows;
+        locationNames.forEach(function(location) {
+            var option = new Set();
+            option.value = location.id;
+            option.text = location.name;
+            if (option === "") {
+                return;
+            }
+            locations.add(option);
+        });
+        callback();
+    });
+}
+
+function loadStaff(callback){
+    httpGet(apiPrefix + "/users?limit=200&order=asc&sort=name", function(response) {
+        var userNames = response.rows;
+        userNames.forEach(function(user) {
+            var option = new Set();
+            option.value = user.id;
+            option.text = user.name;
+            if (option === "") {
+                return;
+            }
+            staff.add(option);
+        });
+        callback();
+    });
+}
+
+function createLocationTab(callback) {
+    var tab = tabsArray[3];
+    var elem = document.createElement("div");
+    elem.className = "tab_body";
+    elem.id = tab;
+    document.getElementById("tabDiv").appendChild(elem);
+
+    elem.appendChild(createInput());
+    elem.appendChild(createAudit());
+    elem.appendChild(createLocationsList());
+    elem.appendChild(createSubmit());
+
+    callback();
+}
+
+function createSubmit(tab) {
+    var submit = document.createElement("button");
+    submit.id = "btnSubmit";
+    submit.innerText = "Submit";
+    submit.type = "button";
+    submit.addEventListener("click", function() {
+        doTab(tab);
+    });
+
+    return submit;
+}
+
+function createLocationsList() {
+    var locationsDiv = document.createElement("div");
+    locationsDiv.className = "locations";
+
+    var locationLabel = document.createElement("p");
+    locationLabel.innerText = "Check-out to the following";
+
+    var locationList = document.createElement("select");
+    locationList.className = "selectList";
+    locationList.disabled = true;
+
+    locations.forEach(function(set) {
+        var option = document.createElement("option");
+        option.text = set.text;
+        option.value = set.value;
+        locationList.appendChild(option);
+    });
+    locationList.disabled = false;
+
+    locationsDiv.appendChild(locationLabel);
+    locationsDiv.appendChild(locationList);
+
+    return locationsDiv;
+}
+
+function createLocationTab(callback) {
+    var tab = tabsArray[2];
+    var elem = document.createElement("div");
+    elem.className = "tab_body";
+    elem.id = tab;
+    document.getElementById("tabDiv").appendChild(elem);
+
+    elem.appendChild(createInput());
+    elem.appendChild(createAudit());
+    elem.appendChild(createLocationsList());
+    elem.appendChild(createSubmit(tab));
+
+    callback();
+}
+
+function createUserTab(callback) {
+    var tab = tabsArray[1];
+    var elem = document.createElement("div");
+    elem.className = "tab_body";
+    elem.id = tab;
+    document.getElementById("tabDiv").appendChild(elem);
+
+    elem.appendChild(createInput());
+    elem.appendChild(createAudit());
+    elem.appendChild(createOpenUsers());
+    elem.appendChild(createStaffList());
+    elem.appendChild(createSubmit(tab));
+
+    callback();
+}
+
+function createOpenUsers() {
+    var userPageDiv = document.createElement("div");
+    userPageDiv.className = "userPage";
+    var userPageLabel = document.createElement("p");
+    userPageLabel.innerText = "Open users page?";
+
+    var checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "userPage";
+    checkbox.checked = true;
+    checkbox.id = "userPage";
+
+    userPageDiv.appendChild(userPageLabel);
+    userPageDiv.appendChild(checkbox);
+
+    return userPageDiv;
+}
+
+function createStaffList() {
+    var usersDiv = document.createElement("div");
+    usersDiv.className = "users";
+
+    var userLabel = document.createElement("p");
+    userLabel.innerText = "Check-out to the following";
+
+    var userList = document.createElement("select");
+    userList.className = "selectList";
+    userList.disabled = true;
+
+    staff.forEach(function(set) {
+        var option = document.createElement("option");
+        option.text = set.text;
+        option.value = set.value;
+        userList.appendChild(option);
+    });
+    userList.disabled = false;
+
+    usersDiv.appendChild(userLabel);
+    usersDiv.appendChild(userList);
+
+    return usersDiv;
+}
 
 function checkBlank(assetTag, callback) {
     if (assetTag == "") {
         callback(blankMsg);
     } else {
         callback(null, assetTag);
-    };
+    }
 }
 
 function checkIfDeployed(assetID, assignedID, callback) {
@@ -33,7 +294,7 @@ function checkIfDeployed(assetID, assignedID, callback) {
             } else {
                 console.log("\tAlready assigned, updating");
                 callback(null, 1);
-            };
+            }
         } else {
             callback(null, 0);
         }
@@ -43,14 +304,22 @@ function checkIfDeployed(assetID, assignedID, callback) {
 function checkInAsset(assetID, callback) {
     var dataObj = {
     };
-    httpPost(apiPrefix + "/hardware/" + assetID + "/checkin", dataObj, function() {
+    httpPost(apiPrefix + "/hardware/" + assetID + "/checkin", dataObj, function(response) {
+        if (response.status == "error") {
+            callback(response.messages);
+            return;
+        }
         console.log("\tChecked in " + assetID);
         callback(null);
     });
 }
 
 function checkOutAsset(assetID, dataObj, callback) {
-    httpPost(apiPrefix + "/hardware/" + assetID + "/checkout", dataObj, function() {
+    httpPost(apiPrefix + "/hardware/" + assetID + "/checkout", dataObj, function(response) {
+        if (response.status == "error") {
+            callback(response.messages);
+            return;
+        }
         console.log("\tChecked out " + assetID);
         callback(null);
     });
@@ -92,25 +361,6 @@ function createInput() {
     return inputDiv;
 }
 
-function createLocations() {
-    var locationsDiv = document.createElement("div");
-    locationsDiv.className = "locations";
-
-    var locationLabel = document.createElement("p");
-    locationLabel.innerText = "Check-out to the following";
-
-    var locationList = document.createElement("select");
-    locationList.id = "selectList";
-    locationList.name = "location";
-    locationList.disabled = "true";
-
-    locationsDiv.appendChild(locationLabel);
-    locationsDiv.appendChild(locationList);
-
-    return locationsDiv;
-
-}
-
 function createModal(name, textHeader) {
     var divModal = document.createElement("div");
     divModal.className = "modal";
@@ -124,7 +374,7 @@ function createModal(name, textHeader) {
     var contentText = document.createElement("p");
     contentText.id = "textmodal";
 
-    var modalHeader = document.createElement("h4");
+    modalHeader = document.createElement("h4");
     modalHeader.innerText = textHeader;
 
     contentModal.appendChild(modalHeader);
@@ -146,73 +396,9 @@ function createModal(name, textHeader) {
     document.querySelector(mainDomElement).appendChild(divModal);
 }
 
-function createOpenUsers() {
-    var userPageDiv = document.createElement("div");
-    userPageDiv.className = "userPage";
-    var userPageLabel = document.createElement("p");
-    userPageLabel.innerText = "Open users page?";
-
-    var checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.name = "userPage";
-    checkbox.checked = true;
-    checkbox.id = "userPage";
-
-    userPageDiv.appendChild(userPageLabel);
-    userPageDiv.appendChild(checkbox);
-
-    return userPageDiv;
-}
-
-function createTabs() {
-    var tabsDiv = document.createElement("div");
-    tabsDiv.className = "tab";
-
-    document.querySelector(mainDomElement).appendChild(tabsDiv);
-
-    for (var tab in tabsArray) {
-        var btnDiv = document.createElement("div");
-        btnDiv.id = tabsArray[tab];
-        btnDiv.className = "tabcontent";
-
-        var btn = document.createElement("button");
-        btn.className = "tablinks";
-        btn.innerHTML = tabsArray[tab];
-        btn.addEventListener("click", function(e) {
-            openTab(e, this.innerHTML);
-        });
-        if (tabsArray[tab] == "Checkout/Updating (Location)") {
-            btn.id = "defaultOpen";
-        }
-
-        tabsDiv.appendChild(btn);
-        document.querySelector(mainDomElement).appendChild(btnDiv);
-    }
-
-}
-
-function createUsers() {
-    var usersDiv = document.createElement("div");
-    usersDiv.className = "users";
-
-    var userLabel = document.createElement("p");
-    userLabel.innerText = "Check-out to the following";
-
-    var userList = document.createElement("select");
-    userList.id = "selectList";
-    userList.name = "user";
-    userList.disabled = "true";
-
-    usersDiv.appendChild(userLabel);
-    usersDiv.appendChild(userList);
-
-    return usersDiv;
-
-}
-
 function disableInput(elem) {
-    elem.querySelectorAll("#selectList")[0].disabled = true;
-    elem.querySelectorAll("#btnSubmit")[0].disabled = true;
+    elem.querySelectorAll("select.selectList")[0].disabled = true;
+    elem.querySelectorAll("button#btnSubmit")[0].disabled = true;
 }
 
 function doAudit(dataObj, callback) {
@@ -222,21 +408,46 @@ function doAudit(dataObj, callback) {
     });
 }
 
-function doCheckin(elem, tab) {
-    var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
+function doTab(tab) {
+    switch (tab) {
+        case tabsArray[0]:
+            doCheckin(tab);
+            break;
+        case tabsArray[1]:
+            doUser(tab);
+            break;
+        case tabsArray[2]:
+            doLocation(tab);
+            break;
+        case tabsArray[3]:
+            doLoadList(tab);
+            break;
+    }
+}
+
+function doCheckin(tab) {
+    var currentTabElements;
+    var elems = document.getElementById("tabDiv").querySelectorAll(".tab_body");
+    for (var i in elems) {
+        if (elems[i].style.display != "none") { // Find the only active one
+            currentTabElements = elems[i];
+            break;
+        }
+    }
+    var assetArray = getAssetIDArray(currentTabElements.querySelectorAll("textarea#inputarea")[0].value);
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
         //disableInput(elem);
-        elem.querySelectorAll("#btnSubmit")[0].disabled = true;
+        currentTabElements.querySelectorAll("#btnSubmit")[0].disabled = true;
         async.waterfall([
             function(callback) {
-                console.log("Trying asset tag " + assetTag)
+                console.log("Trying asset tag " + assetTag);
                 callback(null, assetTag);
             },
             checkBlank,
             getAssetID,
             checkInAsset,
             function(callback) {
-                if (document.getElementById(tab).querySelectorAll("#audit")[0].checked) {
+                if (currentTabElements.querySelectorAll("#audit")[0].checked) {
                     var today = new Date();
                     var dd = today.getDate();
                     var mm = today.getMonth()+1; //January is 0!
@@ -244,12 +455,12 @@ function doCheckin(elem, tab) {
                     var nextyear = yyyy + 1;
 
                     if(dd<10) {
-                        dd = '0'+dd
-                    };
+                        dd = '0'+dd;
+                    }
 
                     if(mm<10) {
-                        mm = '0'+mm
-                    };
+                        mm = '0'+mm;
+                    }
 
                     var dataObj = {
                         "asset_tag": assetTag,
@@ -258,7 +469,7 @@ function doCheckin(elem, tab) {
                     };
                     doAudit(dataObj, callback);
                 } else {
-                    callback(null)
+                    callback(null);
                 }
             },
             function(callback) {
@@ -273,7 +484,7 @@ function doCheckin(elem, tab) {
                 console.log(error);
             } else {
                 console.log(result);
-            };
+            }
             assetArrayCallback(error, result);
         });
     }, function(error, result) {
@@ -281,16 +492,25 @@ function doCheckin(elem, tab) {
             console.log("Fatal - Stopped checking");
             alert("Something went wrong\nCheck console for error");
         } else {
-            elem.querySelectorAll("textarea#inputarea")[0].value = "";
+            currentTabElements.querySelectorAll("textarea#inputarea")[0].value = "";
             console.log("Done everything, cleared inputs");
         }
-        elem.querySelectorAll("#btnSubmit")[0].disabled = false;
+        currentTabElements.querySelectorAll("#btnSubmit")[0].disabled = false;
     });
 }
 
-function doLoadList(elem, tab) {
-    var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
-    createModal(tab, "Save text as a CSV file");
+function doLoadList(tab) {
+    var currentTabElements;
+    var elems = document.getElementById("tabDiv").querySelectorAll(".tab_body");
+    for (var i in elems) {
+        if (elems[i].style.display != "none") { // Find the only active one
+            currentTabElements = elems[i];
+            break;
+        }
+    }
+
+    var assetArray = getAssetIDArray(currentTabElements.querySelectorAll("textarea#inputarea")[0].value);
+    createModal(tabsArray[3], "Save text as a CSV file");
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
         //disableInput(elem);
         async.waterfall([
@@ -302,15 +522,15 @@ function doLoadList(elem, tab) {
             function(assetTag, callback) {
                 httpGet(apiPrefix + "/hardware/bytag/" + assetTag, function(response) {
                     var itemCSV = assetTag;
-                    if (document.getElementById(tab).querySelectorAll("#category")[0].checked) { itemCSV += "," + response.category.name };
-                    if (document.getElementById(tab).querySelectorAll("#make")[0].checked) { itemCSV += "," + response.manufacturer.name };
-                    if (document.getElementById(tab).querySelectorAll("#model")[0].checked) { itemCSV += "," + response.model_number };
+                    if (currentTabElements.querySelectorAll("#category")[0].checked) { itemCSV += "," + response.category.name; }
+                    if (currentTabElements.querySelectorAll("#make")[0].checked) { itemCSV += "," + response.manufacturer.name; }
+                    if (currentTabElements.querySelectorAll("#model")[0].checked) { itemCSV += "," + response.model_number; }
                     itemCSV += "," + response.serial;
                     var modalContent = document.querySelector(mainDomElement).querySelectorAll("#textmodal")[0];
                     var text = document.createTextNode(itemCSV);
                     modalContent.appendChild(text);
                     modalContent.appendChild(document.createElement("br"));
-                    var modal = document.getElementById("modal" + tab);
+                    var modal = document.getElementById("modal" + tabsArray[3]);
                     modal.style.display = "block";
 
                     callback(null);
@@ -328,7 +548,7 @@ function doLoadList(elem, tab) {
                 console.log(error);
             } else {
                 console.log(result);
-            };
+            }
             assetArrayCallback(error, result);
         });
     }, function(error, result) {
@@ -336,20 +556,29 @@ function doLoadList(elem, tab) {
             console.log("Fatal - Stopped checking");
             alert("Something went wrong\nCheck console for error");
         } else {
-            elem.querySelectorAll("textarea#inputarea")[0].value = "";
+            currentTabElements.querySelectorAll("textarea#inputarea")[0].value = "";
             console.log("Done everything, cleared inputs");
         }
         //enableInput(elem);
     });
 }
 
-function doLocation(elem, tab) {
-    var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
-    var locationObj = document.getElementById(tab).querySelectorAll("#selectList")[0];
+function doLocation(tab) {
+    var currentTabElements;
+    var elems = document.getElementById("tabDiv").querySelectorAll(".tab_body");
+    for (var i in elems) {
+        if (elems[i].style.display != "none") { // Find the only active one
+            currentTabElements = elems[i];
+            break;
+        }
+    }
+
+    var assetArray = getAssetIDArray(currentTabElements.querySelectorAll("textarea#inputarea")[0].value);
+    var locationObj = currentTabElements.querySelectorAll("select.selectList")[0];
     var locationID = locationObj.value;
     var assetID = "";
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
-        disableInput(elem);
+        disableInput(currentTabElements);
         async.waterfall([
             function(callback) {
                 console.log("Trying asset tag " + assetTag);
@@ -379,10 +608,10 @@ function doLocation(elem, tab) {
                         break;
                     case 2:
                         callback(null);
-                };
+                }
             },
             function(callback) {
-                if (document.getElementById(tab).querySelectorAll("#audit")[0].checked) {
+                if (currentTabElements.querySelectorAll("#audit")[0].checked) {
                     var today = new Date();
                     var dd = today.getDate();
                     var mm = today.getMonth()+1; //January is 0!
@@ -390,12 +619,12 @@ function doLocation(elem, tab) {
                     var nextyear = yyyy + 1;
 
                     if(dd<10) {
-                        dd = '0'+dd
-                    };
+                        dd = '0'+dd;
+                    }
 
                     if(mm<10) {
-                        mm = '0'+mm
-                    };
+                        mm = '0'+mm;
+                    }
 
                     var dataObj = {
                         "asset_tag": assetTag,
@@ -405,7 +634,7 @@ function doLocation(elem, tab) {
                     };
                     doAudit(dataObj, callback);
                 } else {
-                    callback(null)
+                    callback(null);
                 }
             },
             function(callback) {
@@ -420,7 +649,7 @@ function doLocation(elem, tab) {
                 console.log(error);
             } else {
                 console.log(result);
-            };
+            }
             assetArrayCallback(error, result);
         });
     }, function(error, result) {
@@ -428,20 +657,29 @@ function doLocation(elem, tab) {
             console.log("Fatal - Stopped checking");
             alert("Something went wrong\nCheck console for error");
         } else {
-            elem.querySelectorAll("textarea#inputarea")[0].value = "";
+            currentTabElements.querySelectorAll("textarea#inputarea")[0].value = "";
             console.log("Done everything, cleared inputs");
         }
-        enableInput(elem);
+        enableInput(currentTabElements);
     });
 }
 
-function doUser(elem, tab) {
-    var assetArray = getAssetIDArray(elem.querySelectorAll("textarea#inputarea")[0].value);
-    var userObj = document.getElementById(tab).querySelectorAll("#selectList")[0];
+function doUser(tab) {
+    var currentTabElements;
+    var elems = document.getElementById("tabDiv").querySelectorAll(".tab_body");
+    for (var i in elems) {
+        if (elems[i].style.display != "none") { // Find the only active one
+            currentTabElements = elems[i];
+            break;
+        }
+    }
+
+    var assetArray = getAssetIDArray(currentTabElements.querySelectorAll("textarea#inputarea")[0].value);
+    var userObj = currentTabElements.querySelectorAll("select.selectList")[0];
     var userID = userObj.value;
     var assetID = "";
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
-        disableInput(elem);
+        disableInput(currentTabElements);
         async.waterfall([
             function(callback) {
                 console.log("Trying asset tag " + assetTag);
@@ -471,10 +709,10 @@ function doUser(elem, tab) {
                         break;
                     case 2:
                         callback(null);
-                };
+                }
             },
             function(callback) {
-                if (document.getElementById(tab).querySelectorAll("#audit")[0].checked) {
+                if (currentTabElements.querySelectorAll("#audit")[0].checked) {
                     var today = new Date();
                     var dd = today.getDate();
                     var mm = today.getMonth()+1; //January is 0!
@@ -482,12 +720,12 @@ function doUser(elem, tab) {
                     var nextyear = yyyy + 1;
 
                     if(dd<10) {
-                        dd = '0'+dd
-                    };
+                        dd = '0'+dd;
+                    }
 
                     if(mm<10) {
-                        mm = '0'+mm
-                    };
+                        mm = '0'+mm;
+                    }
 
                     var dataObj = {
                         "asset_tag": assetTag,
@@ -496,14 +734,14 @@ function doUser(elem, tab) {
                     };
                     doAudit(dataObj, callback);
                 } else {
-                    callback(null)
+                    callback(null);
                 }
             },
             function(callback) {
-                callback(null, "Done");
-                if (document.getElementById(tab).querySelectorAll("#userPage")[0].checked) {
+                callback(null, "Done " + tabsArray[1]);
+                if (currentTabElements.querySelectorAll("#userPage")[0].checked) {
                     window.open(siteUrl + "/users/" + userID + "/print", '_blank');
-                };
+                }
             }
         ], function(error, result) {
             if (error === blankMsg) {
@@ -514,7 +752,7 @@ function doUser(elem, tab) {
                 console.log(error);
             } else {
                 console.log(result);
-            };
+            }
             assetArrayCallback(error, result);
         });
     }, function(error, result) {
@@ -522,16 +760,16 @@ function doUser(elem, tab) {
             console.log("Fatal - Stopped checking");
             alert("Something went wrong\nCheck console for error");
         } else {
-            elem.querySelectorAll("textarea#inputarea")[0].value = "";
+            currentTabElements.querySelectorAll("textarea#inputarea")[0].value = "";
             console.log("Done everything, cleared inputs");
         }
-        enableInput(elem);
+        enableInput(currentTabElements);
     });
 }
 
 function enableInput(elem) {
-    elem.querySelectorAll("#selectList")[0].disabled = false;
-    elem.querySelectorAll("#btnSubmit")[0].disabled = false;
+    elem.querySelectorAll("select.selectList")[0].disabled = false;
+    elem.querySelectorAll("button#btnSubmit")[0].disabled = false;
 }
 
 function getAssetID(assetTag, callback) {
@@ -552,49 +790,6 @@ function getAssetIDArray(inputList) {
     } else {
         return inputArray;
     }
-}
-
-function getLocations(tab) {
-    httpGet(apiPrefix + "/locations", function(response) {
-        var locations = response.rows;
-        var elemList = tab.querySelectorAll('#selectList');
-
-        locations.sort(function(a, b){
-            if(a.name < b.name) return -1;
-            if(a.name > b.name) return 1;
-            return 0;
-        });
-
-        elemList.forEach(function(elem) {
-            elem.disabled = false;
-            locations.forEach(function(loc) {
-                var option = document.createElement("option");
-                option.value = loc.id;
-                option.text = loc.name;
-                elem.appendChild(option);
-            });
-        });
-    });
-}
-
-function getUsers(tab) {
-    httpGet(apiPrefix + "/users?limit=200", function(response) {
-        var users = response.rows;
-        var elemList = tab.querySelectorAll('#selectList');
-
-        users.sort();
-        users.reverse();
-
-        elemList.forEach(function(elem) {
-            elem.disabled = false;
-            users.forEach(function(user) {
-                var option = document.createElement("option");
-                option.value = user.id;
-                option.text = user.name;
-                elem.appendChild(option);
-            });
-        });
-    });
 }
 
 function httpGet(url, successCallback, errorCallback) {
@@ -630,6 +825,9 @@ function httpRequest(method, url, dataObj, successCallback, errorCallback) {
                 return successCallback(obj);
             } else if (this.status == 401) {
                 alert(obj.error);
+                if (errorCallback !== undefined) {
+                    errorCallback(obj.error);
+                }
                 return;
             }
 
@@ -652,41 +850,27 @@ function httpRequest(method, url, dataObj, successCallback, errorCallback) {
     xhr.send(JSON.stringify(payload));
 }
 
-function initScanner(callback) {
+function createCheckIn(callback) {
+    var tab = tabsArray[0];
+    var elem = document.createElement("div");
+    elem.className = "tab_body";
+    elem.id = tab;
+    document.getElementById("tabDiv").appendChild(elem);
 
-    var page = document.createElement("div");
-    page.id = mainDomElement;
-
-    createTabs();
-    initLocation();
-    initUser();
-    initCheckIn();
-    initLoadList();
-
-    // Get the element with id="defaultOpen" and click on it
-    document.getElementById("defaultOpen").click();
-}
-
-function initCheckIn() {
-    var tab = "Check-in";
-    var elem = document.getElementById(tab);
     elem.appendChild(createInput());
     elem.appendChild(createAudit());
+    elem.appendChild(createSubmit(tab));
 
-    var submit = document.createElement("button");
-    submit.id = "btnSubmit";
-    submit.innerText = "Submit";
-    submit.type = "button";
-    submit.addEventListener("click", function() {
-        doCheckin(elem, tab);
-    });
-
-    elem.appendChild(submit);
+    callback();
 }
 
-function initLoadList() {
-    var tab = "Load List";
-    var elem = document.getElementById(tab);
+function createLoadList(callback) {
+    var tab = tabsArray[3];
+    var elem = document.createElement("div");
+    elem.className = "tab_body";
+    elem.id = tab;
+    document.getElementById("tabDiv").appendChild(elem);
+
     elem.appendChild(createInput());
 
     var extraFieldsDiv = document.createElement("div");
@@ -744,64 +928,27 @@ function initLoadList() {
     elem.appendChild(addMake);
     elem.appendChild(addModel);
     elem.appendChild(submit);
+
+    callback();
 }
 
-function initLocation() {
-    var tab = "Checkout/Updating (Location)";
-    var elem = document.getElementById(tab);
-    elem.appendChild(createInput());
-    elem.appendChild(createAudit());
-    elem.appendChild(createLocations());
-
-    var submit = document.createElement("button");
-    submit.id = "btnSubmit";
-    submit.innerText = "Submit";
-    submit.type = "button";
-    submit.addEventListener("click", function() {
-        doLocation(elem, tab);
-    });
-
-    elem.appendChild(submit);
-    getLocations(elem);
+function loadAPIKey(callback) {
+    apiToken = localStorage.getItem("API_Token");
+    callback();
 }
 
-function initUser() {
-    var tab = "Checkout/Updating (User)";
-    var elem = document.getElementById(tab);
-    elem.appendChild(createInput());
-    elem.appendChild(createAudit());
-    elem.appendChild(createOpenUsers());
-    elem.appendChild(createUsers());
-
-    var submit = document.createElement("button");
-    submit.id = "btnSubmit";
-    submit.innerText = "Submit";
-    submit.type = "button";
-    submit.addEventListener("click", function() {
-        doUser(elem, tab);
-    });
-
-    elem.appendChild(submit);
-    getUsers(elem);
-}
-
-function openTab(e, tabName) {
-    // Declare all variables
-    var i, tabcontent, tablinks;
-
-    // Get all elements with class="tabcontent" and hide them
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
+function openTab(evt) {
+    // Get all elements with class="tab_body" and hide them
+    var allTabBody = document.getElementsByClassName("tab_body");
+    for (let i of allTabBody) {
+        i.style.display = "none";
     }
 
-    // Get all elements with class="tablinks" and remove the class "active"
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
+    var en = allTabBody.namedItem(evt.currentTarget.innerText);
+    en.style.display = "block";
+}
 
-    // Show the current tab, and add an "active" class to the button that opened the tab
-    document.getElementById(tabName).style.display = "block";
-    e.currentTarget.className += " active";
+function saveAPIKey(key) {
+    localStorage.setItem("API_Token", key.value);
+    window.location.reload();
 }

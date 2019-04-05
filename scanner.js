@@ -426,11 +426,18 @@ function doTab(tab) {
 }
 
 function doCheckin(tab) {
-    var tabElements = document.getElementById("tabDiv").querySelectorAll("#" + tabsArray[0] + ".tab_body")[0];
-    var assetArray = getAssetIDArray(tabElements.querySelectorAll("textarea#inputarea")[0].value);
+    var currentTabElements;
+    var elems = document.getElementById("tabDiv").querySelectorAll(".tab_body");
+    for (var i in elems) {
+        if (elems[i].style.display != "none") { // Find the only active one
+            currentTabElements = elems[i];
+            break;
+        }
+    }
+    var assetArray = getAssetIDArray(currentTabElements.querySelectorAll("textarea#inputarea")[0].value);
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
         //disableInput(elem);
-        tabElements.querySelectorAll("#btnSubmit")[0].disabled = true;
+        currentTabElements.querySelectorAll("#btnSubmit")[0].disabled = true;
         async.waterfall([
             function(callback) {
                 console.log("Trying asset tag " + assetTag);
@@ -440,7 +447,7 @@ function doCheckin(tab) {
             getAssetID,
             checkInAsset,
             function(callback) {
-                if (tabElements.querySelectorAll("#audit")[0].checked) {
+                if (currentTabElements.querySelectorAll("#audit")[0].checked) {
                     var today = new Date();
                     var dd = today.getDate();
                     var mm = today.getMonth()+1; //January is 0!
@@ -485,16 +492,24 @@ function doCheckin(tab) {
             console.log("Fatal - Stopped checking");
             alert("Something went wrong\nCheck console for error");
         } else {
-            tabElements.querySelectorAll("textarea#inputarea")[0].value = "";
+            currentTabElements.querySelectorAll("textarea#inputarea")[0].value = "";
             console.log("Done everything, cleared inputs");
         }
-        tabElements.querySelectorAll("#btnSubmit")[0].disabled = false;
+        currentTabElements.querySelectorAll("#btnSubmit")[0].disabled = false;
     });
 }
 
 function doLoadList(tab) {
-    var tabElements = document.getElementById("tabDiv").querySelectorAll("#" + tabsArray[3] + ".tab_body")[0];
-    var assetArray = getAssetIDArray(tabElements.querySelectorAll("textarea#inputarea")[0].value);
+    var currentTabElements;
+    var elems = document.getElementById("tabDiv").querySelectorAll(".tab_body");
+    for (var i in elems) {
+        if (elems[i].style.display != "none") { // Find the only active one
+            currentTabElements = elems[i];
+            break;
+        }
+    }
+
+    var assetArray = getAssetIDArray(currentTabElements.querySelectorAll("textarea#inputarea")[0].value);
     createModal(tabsArray[3], "Save text as a CSV file");
     async.eachOfLimit(assetArray, 1, function(assetTag, index, assetArrayCallback) {
         //disableInput(elem);
@@ -507,9 +522,9 @@ function doLoadList(tab) {
             function(assetTag, callback) {
                 httpGet(apiPrefix + "/hardware/bytag/" + assetTag, function(response) {
                     var itemCSV = assetTag;
-                    if (tabElements.querySelectorAll("#category")[0].checked) { itemCSV += "," + response.category.name; }
-                    if (tabElements.querySelectorAll("#make")[0].checked) { itemCSV += "," + response.manufacturer.name; }
-                    if (tabElements.querySelectorAll("#model")[0].checked) { itemCSV += "," + response.model_number; }
+                    if (currentTabElements.querySelectorAll("#category")[0].checked) { itemCSV += "," + response.category.name; }
+                    if (currentTabElements.querySelectorAll("#make")[0].checked) { itemCSV += "," + response.manufacturer.name; }
+                    if (currentTabElements.querySelectorAll("#model")[0].checked) { itemCSV += "," + response.model_number; }
                     itemCSV += "," + response.serial;
                     var modalContent = document.querySelector(mainDomElement).querySelectorAll("#textmodal")[0];
                     var text = document.createTextNode(itemCSV);
@@ -541,7 +556,7 @@ function doLoadList(tab) {
             console.log("Fatal - Stopped checking");
             alert("Something went wrong\nCheck console for error");
         } else {
-            tabElements.querySelectorAll("textarea#inputarea")[0].value = "";
+            currentTabElements.querySelectorAll("textarea#inputarea")[0].value = "";
             console.log("Done everything, cleared inputs");
         }
         //enableInput(elem);

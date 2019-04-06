@@ -279,25 +279,23 @@ function checkBlank(assetTag, callback) {
     }
 }
 
-function checkIfDeployed(assetID, assignedID, callback) {
+function checkIfDeployed(searchAssetCallback, compareID, callback) {
 /*
     0 = not deployed
     1 = deployed, but needs updating
     2 = deployed, already assigned
 */
-    httpGet(apiPrefix + "/hardware/" + assetID, function(response, status_callback) {
-        if (response.status_label.status_meta == "deployed") {
-            if (response.assigned_to.id == assignedID) {
-                console.log("\tAlready assigned correctly");
-                callback(null, 2);
-            } else {
-                console.log("\tAlready assigned, updating");
-                callback(null, 1);
-            }
+    if (searchAssetCallback.status_label.status_meta == "deployed") {
+        if (searchAssetCallback.assigned_to.id == compareID) {
+            console.log("\tAlready assigned correctly");
+            callback(null, 2);
         } else {
-            callback(null, 0);
+            console.log("\tAlready assigned, updating");
+            callback(null, 1);
         }
-    });
+    } else {
+        callback(null, 0);
+    }
 }
 
 function checkInAsset(assetID, callback) {
@@ -426,6 +424,7 @@ function doTab(tab) {
 
 function doCheckin(tab) {
     var currentTabElements;
+    var assetID;
     var elems = document.getElementById("tabDiv").querySelectorAll(".tab_body");
     for (var i in elems) {
         if (elems[i].style.display != "none") { // Find the only active one
@@ -443,7 +442,19 @@ function doCheckin(tab) {
                 callback(null, assetTag);
             },
             checkBlank,
-            getAssetID,
+            searchAsset,
+            function(searchAssetCallback, callback) {
+                assetID = searchAssetCallback.id;
+                callback(null, searchAssetCallback, null) // No comparison ID needed
+            },
+            checkIfDeployed,
+            function(deployedState, callback) {
+                if (deployedState > 0) {
+                    callback(null, assetID);
+                } else {
+                    callback("OK");
+                }
+            },
             checkInAsset,
             function(callback) {
                 if (currentTabElements.querySelectorAll("#audit")[0].checked) {
@@ -478,6 +489,9 @@ function doCheckin(tab) {
             if (error === blankMsg) {
                 // Just to break out of waterfall
                 console.log(error);
+                error = undefined;
+            } else if (error === "OK") {
+                console.log("Asset already checked-in")
                 error = undefined;
             } else if (error) {
                 console.log(error);
@@ -584,10 +598,10 @@ function doLocation(tab) {
                 callback(null, assetTag);
             },
             checkBlank,
-            getAssetID,
-            function(assetID_callback, callback) {
-                assetID = assetID_callback; // Update function variable
-                callback(null, assetID, locationID);
+            searchAsset,
+            function(searchAssetCallback, callback) {
+                assetID = searchAssetCallback.id;
+                callback(null, searchAssetCallback, locationID);
             },
             checkIfDeployed,
             function(deployedState, callback) {
@@ -685,10 +699,10 @@ function doUser(tab) {
                 callback(null, assetTag);
             },
             checkBlank,
-            getAssetID,
-            function(assetID_callback, callback) {
-                assetID = assetID_callback; // Update function variable
-                callback(null, assetID, userID);
+            searchAsset,
+            function(searchAssetCallback, callback) {
+                assetID = searchAssetCallback.id;
+                callback(null, searchAssetCallback, userID);
             },
             checkIfDeployed,
             function(deployedState, callback) {
@@ -771,12 +785,12 @@ function enableInput(elem) {
     elem.querySelectorAll("button#btnSubmit")[0].disabled = false;
 }
 
-function getAssetID(assetTag, callback) {
+function searchAsset(assetTag, callback) {
     httpGet(apiPrefix + "/hardware?search=" + assetTag, function(response) {
         if (response.total == 0 || response.total > 1) {
             callback("Invalid tag " + assetTag);
         } else {
-            callback(null, response.rows[0].id);
+            callback(null, response.rows[0]);
         }
     });
 }

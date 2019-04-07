@@ -830,6 +830,7 @@ function httpRequest(method, url, dataObj, successCallback, errorCallback) {
             if (response === "") {
                 var msg = "No response for request " + url;
                 console.warn(msg);
+                alert("Failed Request\nConsole log for more info");
                 return;
             }
 

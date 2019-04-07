@@ -119,11 +119,11 @@ function loadLocations(callback) {
         var locationNames = response.rows;
         locationNames.forEach(function(location) {
             var option = new Set();
-            option.value = location.id;
-            option.text = location.name;
             if (option === "") {
                 return;
             }
+            option.text = location.name;
+            option.value = location.id;
             locations.add(option);
         });
         callback();
@@ -135,11 +135,11 @@ function loadStaff(callback){
         var userNames = response.rows;
         userNames.forEach(function(user) {
             var option = new Set();
-            option.value = user.id;
-            option.text = user.name;
             if (option === "") {
                 return;
             }
+            option.value = user.id;
+            option.text = user.name;
             staff.add(option);
         });
         callback();

@@ -780,7 +780,7 @@ function doUser(tab) {
 
             if (currentTabElements.querySelectorAll("#userPage")[0].checked) {
                 if (uniqueUserList.length > 1) {
-                    window.alert("Opening user sheets for transferred items and assigned user");
+                    window.alert("Opening user pages including whom the assets were assigned to");
                 }
                 uniqueUserList.forEach(function(user) {
                     window.open(siteUrl + "/users/" + user + "/print", '_blank');

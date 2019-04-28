@@ -12,6 +12,7 @@ var apiPrefix = "/api/v1";
 var mainDomElement = "#scanner";
 var locations = new Set();
 var staff = new Set();
+var notifyUsers = [];
 
 function initScanner(callback) {
 
@@ -118,11 +119,11 @@ function loadLocations(callback) {
         var locationNames = response.rows;
         locationNames.forEach(function(location) {
             var option = new Set();
+            option.value = location.id;
+            option.text = location.name;
             if (option === "") {
                 return;
             }
-            option.text = location.name;
-            option.value = location.id;
             locations.add(option);
         });
         callback();
@@ -134,11 +135,11 @@ function loadStaff(callback){
         var userNames = response.rows;
         userNames.forEach(function(user) {
             var option = new Set();
+            option.value = user.id;
+            option.text = user.name;
             if (option === "") {
                 return;
             }
-            option.value = user.id;
-            option.text = user.name;
             staff.add(option);
         });
         callback();
@@ -291,6 +292,7 @@ function checkIfDeployed(searchAssetCallback, compareID, callback) {
             callback(null, 2);
         } else {
             console.log("\tAlready assigned, updating");
+            notifyUsers.push(searchAssetCallback.assigned_to.id);
             callback(null, 1);
         }
     } else {
@@ -751,10 +753,7 @@ function doUser(tab) {
                 }
             },
             function(callback) {
-                callback(null, "Done " + tabsArray[1]);
-                if (currentTabElements.querySelectorAll("#userPage")[0].checked) {
-                    window.open(siteUrl + "/users/" + userID + "/print", '_blank');
-                }
+                callback(null, "Done");
             }
         ], function(error, result) {
             if (error === blankMsg) {
@@ -773,7 +772,22 @@ function doUser(tab) {
             console.log("Fatal - Stopped checking");
             alert("Something went wrong\nCheck console for error");
         } else {
+            // Clean up
             currentTabElements.querySelectorAll("textarea#inputarea")[0].value = "";
+            notifyUsers.push(userID);
+            // Get list without duplicates
+            var uniqueUserList = Array.from(new Set(notifyUsers));
+
+            if (currentTabElements.querySelectorAll("#userPage")[0].checked) {
+                if (uniqueUserList.length > 1) {
+                    window.alert("Opening user sheets for transferred items and assigned user");
+                }
+                uniqueUserList.forEach(function(user) {
+                    window.open(siteUrl + "/users/" + user + "/print", '_blank');
+                });
+            }
+            notifyUsers = [];
+
             console.log("Done everything, cleared inputs");
         }
         enableInput(currentTabElements);
@@ -830,7 +844,6 @@ function httpRequest(method, url, dataObj, successCallback, errorCallback) {
             if (response === "") {
                 var msg = "No response for request " + url;
                 console.warn(msg);
-                alert("Failed Request\nConsole log for more info");
                 return;
             }
 

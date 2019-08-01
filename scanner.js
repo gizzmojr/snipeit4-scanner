@@ -447,7 +447,7 @@ function doCheckin(tab) {
             searchAsset,
             function(searchAssetCallback, callback) {
                 assetID = searchAssetCallback.id;
-                callback(null, searchAssetCallback, null) // No comparison ID needed
+                callback(null, searchAssetCallback, 0) // zero to force checkIfDeployed condition 1
             },
             checkIfDeployed,
             function(deployedState, callback) {
@@ -507,7 +507,9 @@ function doCheckin(tab) {
             console.log("Fatal - Stopped checking");
             alert("Something went wrong\nCheck console for error");
         } else {
+            // Clean up
             currentTabElements.querySelectorAll("textarea#inputarea")[0].value = "";
+            printUserPages(currentTabElements);
             console.log("Done everything, cleared inputs");
         }
         currentTabElements.querySelectorAll("#btnSubmit")[0].disabled = false;
@@ -672,6 +674,7 @@ function doLocation(tab) {
             console.log("Fatal - Stopped checking");
             alert("Something went wrong\nCheck console for error");
         } else {
+            // Clean up
             currentTabElements.querySelectorAll("textarea#inputarea")[0].value = "";
             console.log("Done everything, cleared inputs");
         }
@@ -775,18 +778,7 @@ function doUser(tab) {
             // Clean up
             currentTabElements.querySelectorAll("textarea#inputarea")[0].value = "";
             notifyUsers.push(userID);
-            // Get list without duplicates
-            var uniqueUserList = Array.from(new Set(notifyUsers));
-
-            if (currentTabElements.querySelectorAll("#userPage")[0].checked) {
-                if (uniqueUserList.length > 1) {
-                    window.alert("Opening user pages including whom the assets were assigned to");
-                }
-                uniqueUserList.forEach(function(user) {
-                    window.open(siteUrl + "/users/" + user + "/print", '_blank');
-                });
-            }
-            notifyUsers = [];
+            printUserPages(currentTabElements);
 
             console.log("Done everything, cleared inputs");
         }
@@ -885,6 +877,7 @@ function createCheckIn(callback) {
     document.getElementById("tabDiv").appendChild(elem);
 
     elem.appendChild(createInput());
+    elem.appendChild(createOpenUsers())
     elem.appendChild(createAudit());
     elem.appendChild(createSubmit(tab));
 
@@ -978,4 +971,19 @@ function openTab(evt) {
 function saveAPIKey(key) {
     localStorage.setItem("API_Token", key.value);
     window.location.reload();
+}
+
+function printUserPages(currentTabElements) {
+    // Get list without duplicates
+    var uniqueUserList = Array.from(new Set(notifyUsers));
+
+    if (currentTabElements.querySelectorAll("#userPage")[0].checked) {
+        if (uniqueUserList.length > 1) {
+            window.alert("Opening user pages including whom the assets were assigned to");
+        }
+        uniqueUserList.forEach(function(user) {
+            window.open(siteUrl + "/users/" + user + "/print", '_blank');
+        });
+    }
+    notifyUsers = [];
 }

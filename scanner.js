@@ -292,7 +292,9 @@ function checkIfDeployed(searchAssetCallback, compareID, callback) {
             callback(null, 2);
         } else {
             console.log("\tAlready assigned, updating");
-            notifyUsers.push(searchAssetCallback.assigned_to.id);
+            if (searchAssetCallback.assigned_to.type == "user") {
+                notifyUsers.push(searchAssetCallback.assigned_to.id);
+            }
             callback(null, 1);
         }
     } else {

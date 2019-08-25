@@ -44,13 +44,81 @@ function initTabBody(callback) {
 
 function initNav(callback) {
     document.querySelector(mainDomElement).appendChild(createTabs());
+    callback();
+}
 
-    // TODO Handle the login button better
-    var btnAuth = document.createElement("button");
-    btnAuth.id = "btnAuth";
-    btnAuth.innerText = "Login";
-    btnAuth.type = "button";
-    btnAuth.addEventListener("click", function() {
+function createTabs(){
+    var options = document.createElement("div");
+    options.id = "cssmenu";
+    var ulist = document.createElement("ul");
+
+    // Home
+    var home = document.createElement("li");
+    home.id = "home";
+    var link = document.createElement("a");
+    link.href = "#";
+    var span = document.createElement("span");
+    span.innerText = "Home";
+    link.addEventListener("click", function() {
+        closeAction();
+    });
+
+    link.appendChild(span);
+    home.appendChild(link);
+    ulist.appendChild(home);
+
+    // Actions Menu
+    var actions = document.createElement("li");
+    actions.id = "actions";
+    actions.className = "has-sub";
+    var actionUList = document.createElement("ul");
+    link = document.createElement("a");
+    link.href = "#";
+    span = document.createElement("span");
+    span.innerText = "Actions";
+
+    link.appendChild(span);
+    actions.appendChild(link);
+    actions.appendChild(actionUList);
+    ulist.appendChild(actions);
+
+    // Action List
+    for (var tab in tabsArray) {
+        var actionLi = document.createElement("li");
+        actionLi.id = tabsArray[tab];
+        link = document.createElement("a");
+        link.href = "#";
+        span = document.createElement("span");
+        span.innerText = tabsArray[tab];
+        link.addEventListener("click", function(e) {
+            openAction(e);
+        });
+
+        link.appendChild(span);
+        actionLi.appendChild(link);
+        actionUList.appendChild(actionLi);
+    }
+
+    // Settings
+    var settings = document.createElement("li");
+    settings.id = "home";
+    link = document.createElement("a");
+    link.href = "#";
+    span = document.createElement("span");
+    span.innerText = "Settings";
+
+    link.appendChild(span);
+    settings.appendChild(link);
+    ulist.appendChild(settings);
+
+    // Login
+    var login = document.createElement("li");
+    login.id = "home";
+    link = document.createElement("a");
+    link.href = "#";
+    span = document.createElement("span");
+    span.innerText = "Login";
+    link.addEventListener("click", function() {
         createModal("", "Store API Key");
         var modalContent = document.getElementById("textmodal");
         var inputAPI = document.createElement("textarea");
@@ -69,32 +137,15 @@ function initNav(callback) {
         modalContent.appendChild(inputAPI);
         modalContent.appendChild(btnSave);
     });
-    document.querySelector("#nav").appendChild(btnAuth);
 
-    callback();
-}
+    link.appendChild(span);
+    login.appendChild(link);
+    ulist.appendChild(login);
 
-function createTabs(){
-    var tabs = document.createElement("div");
-    tabs.id = "nav";
+    // End
+    options.appendChild(ulist);
 
-    for (var tab in tabsArray) {
-        var btnDiv = document.createElement("div");
-        btnDiv.id = tabsArray[tab];
-        btnDiv.className = "tabcontent";
-
-        var btn = document.createElement("button");
-        btn.className = "tabbutton";
-        btn.innerHTML = tabsArray[tab];
-        btn.addEventListener("click", function(e) {
-            openTab(e);
-        });
-
-        btnDiv.appendChild(btn);
-        tabs.appendChild(btnDiv);
-    }
-
-    return tabs;
+    return options;
 }
 
 function initPage(callback){
@@ -449,7 +500,7 @@ function doCheckin(tab) {
             searchAsset,
             function(searchAssetCallback, callback) {
                 assetID = searchAssetCallback.id;
-                callback(null, searchAssetCallback, 0) // zero to force checkIfDeployed condition 1
+                callback(null, searchAssetCallback, 0); // zero to force checkIfDeployed condition 1
             },
             checkIfDeployed,
             function(deployedState, callback) {
@@ -495,7 +546,7 @@ function doCheckin(tab) {
                 console.log(error);
                 error = undefined;
             } else if (error === "OK") {
-                console.log("Asset already checked-in")
+                console.log("Asset already checked-in");
                 error = undefined;
             } else if (error) {
                 console.log(error);
@@ -838,6 +889,7 @@ function httpRequest(method, url, dataObj, successCallback, errorCallback) {
             if (response === "") {
                 var msg = "No response for request " + url;
                 console.warn(msg);
+                alert(msg);
                 return;
             }
 
@@ -879,7 +931,7 @@ function createCheckIn(callback) {
     document.getElementById("tabDiv").appendChild(elem);
 
     elem.appendChild(createInput());
-    elem.appendChild(createOpenUsers())
+    elem.appendChild(createOpenUsers());
     elem.appendChild(createAudit());
     elem.appendChild(createSubmit(tab));
 
@@ -959,7 +1011,7 @@ function loadAPIKey(callback) {
     callback();
 }
 
-function openTab(evt) {
+function openAction(evt) {
     // Get all elements with class="tab_body" and hide them
     var allTabBody = document.getElementsByClassName("tab_body");
     for (let i of allTabBody) {
@@ -968,6 +1020,14 @@ function openTab(evt) {
 
     var en = allTabBody.namedItem(evt.currentTarget.innerText);
     en.style.display = "block";
+}
+
+function closeAction(evt) {
+    // Get all elements with class="tab_body" and hide them
+    var allTabBody = document.getElementsByClassName("tab_body");
+    for (let i of allTabBody) {
+        i.style.display = "none";
+    }
 }
 
 function saveAPIKey(key) {

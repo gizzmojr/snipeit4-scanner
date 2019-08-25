@@ -26,7 +26,11 @@ function initScanner(callback) {
         initPage
     ],
     function(err, results) {
-        console.log("Initialized Page");
+        if (err) {
+            console.log(err);
+        } else {
+            console.log("Initialized Page");
+        }
     });
 
 //

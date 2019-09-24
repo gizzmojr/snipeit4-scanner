@@ -19,9 +19,10 @@ function initScanner(callback) {
     var page = document.createElement("div");
     page.id = mainDomElement;
 
-    async.parallel([
+    async.series([
         loadAPIKey,
         initNav,
+        checkAuth,
         initTabBody,
         initPage
     ],
@@ -30,6 +31,7 @@ function initScanner(callback) {
             console.log(err);
         } else {
             console.log("Initialized Page");
+            // console.log(results);
         }
     });
 
@@ -43,15 +45,27 @@ function initTabBody(callback) {
     tabDiv.id = "tabDiv";
     document.querySelector(mainDomElement).appendChild(tabDiv);
 
-    callback();
+    callback(null, "Initialized Body");
 }
 
 function initNav(callback) {
     document.querySelector(mainDomElement).appendChild(createTabs());
-    callback();
+    callback(null, "Initialized Nav");
 }
 
-function createTabs(){
+function checkAuth(callback) {
+    httpGet(apiPrefix + "/hardware/1", function(response) {
+        if (response.serial != '') {
+            document.getElementById("login").innerHTML = "";
+            callback(null, "Authenticated");
+        }
+    }, function(error) {
+        document.getElementById("actions").innerHTML = "";
+        callback("Not authorized");
+    });
+}
+
+function createTabs() {
     var options = document.createElement("div");
     options.id = "cssmenu";
     var ulist = document.createElement("ul");
@@ -104,20 +118,20 @@ function createTabs(){
     }
 
     // Settings
-    var settings = document.createElement("li");
-    settings.id = "home";
-    link = document.createElement("a");
-    link.href = "#";
-    span = document.createElement("span");
-    span.innerText = "Settings";
-
-    link.appendChild(span);
-    settings.appendChild(link);
-    ulist.appendChild(settings);
+    // var settings = document.createElement("li");
+    // settings.id = "settings";
+    // link = document.createElement("a");
+    // link.href = "#";
+    // span = document.createElement("span");
+    // span.innerText = "Settings";
+    //
+    // link.appendChild(span);
+    // settings.appendChild(link);
+    // ulist.appendChild(settings);
 
     // Login
     var login = document.createElement("li");
-    login.id = "home";
+    login.id = "login";
     link = document.createElement("a");
     link.href = "#";
     span = document.createElement("span");
@@ -166,7 +180,7 @@ function initPage(callback){
             console.log(err);
         }
     });
-    callback();
+    callback(null, "Done");
 }
 
 function loadLocations(callback) {
@@ -1012,7 +1026,7 @@ function createLoadList(callback) {
 
 function loadAPIKey(callback) {
     apiToken = localStorage.getItem("API_Token");
-    callback();
+    callback(null, "Load API Key");
 }
 
 function openAction(evt) {

@@ -863,11 +863,11 @@ function enableInput(elem) {
 }
 
 function searchAsset(assetTag, callback) {
-    httpGet(apiPrefix + "/hardware?search=" + assetTag, function(response) {
-        if (response.total == 0 || response.total > 1) {
+    httpGet(apiPrefix + "/hardware/bytag/" + assetTag, function(response) {
+        if (response.id <= 0) {
             callback("Invalid tag " + assetTag);
         } else {
-            callback(null, response.rows[0]);
+            callback(null, response);
         }
     });
 }

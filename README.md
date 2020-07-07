@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The purpose of this project was to work around a few current limitations of Snipe-IT using the v4 API. This was done for my own needs, in hopes it gets depricated into future features of Snipe-IT.
+The purpose of this project was to work around a few current limitations of [Snipe-IT](https://github.com/snipe/snipe-it) using the v4 API. This was done for my own needs, in hopes it gets depricated into future features of Snipe-IT.
 
 It doesn't have to look good, just needs to work. Built with barcode scanner usage in mind, something that adds a CR/LF at the end.
 

@@ -13,6 +13,7 @@ var mainDomElement = "#scanner";
 var locations = new Set();
 var staff = new Set();
 var notifyUsers = [];
+var version = "0.2"
 
 function initScanner(callback) {
 

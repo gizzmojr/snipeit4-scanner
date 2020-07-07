@@ -1025,8 +1025,12 @@ function createLoadList(callback) {
 }
 
 function loadAPIKey(callback) {
-    apiToken = localStorage.getItem("API_Token");
-    callback(null, "Load API Key");
+    if (apiToken != "") {
+        callback(null, "Load API Key");
+    } else {
+        apiToken = localStorage.getItem("API_Token");
+        callback(null, "Load API Key");
+    }
 }
 
 function openAction(evt) {

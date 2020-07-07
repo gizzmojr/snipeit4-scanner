@@ -19,7 +19,7 @@ The wish is to walk into a managed location (COMM room, conf room, etc), or user
 
 1. Clone the project into <snipe-it_root_dir/public>
 1. Fetch API key from <http://snipeiturl/account/api>
-1. Add your API key in scanner.js
+1. Login and add your API key, stored in browser local storage (Optionally add to scanner.js for single user mode)
 1. Access <http://snipeiturl/snipeit4-scanner> with any modern web browser
 
 NOTE: Check folder/file ownership for the webserver (EX: chmod -R www-data:www-data <path_to_checkout>)

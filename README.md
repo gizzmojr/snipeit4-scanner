@@ -10,7 +10,7 @@ The wish is to walk into a managed location (COMM room, conf room, etc), or user
 
 ## Features
 
-* Bulk checking out to user and location
+* ~~Bulk checking out to user and location~~ (<https://demo.snipeitapp.com/hardware/bulkcheckout>)
 * Bulk updating asset user and location (regardless if checked in/out)
 * Bulk checking in assets
 * Ability to set next audit date to one year on updating assets
